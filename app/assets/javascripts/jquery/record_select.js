@@ -102,7 +102,7 @@ if (typeof(jQuery.fn.delayedObserver) === 'undefined') {
    
     jQuery.fn.extend({
       delayedObserver:function(delay, callback){
-        $this = $(this);
+        $this = jQuery(this);
        
         delayedObserverStack.push({
           obj: $this, timer: null, delay: delay,
@@ -122,10 +122,10 @@ if (typeof(jQuery.fn.delayedObserver) === 'undefined') {
   })();
 };
 
-$(document).ready(function() {
+jQuery(document).ready(function() {
   RecordSelect.document_loaded = true;
-  $('div.record-select * li.record a').live('ajax:before', function(event) {
-    var link = $(this);
+  jQuery('div.record-select * li.record a').live('ajax:before', function(event) {
+    var link = jQuery(this);
     if (link) {
       if (RecordSelect.notify(link) == false) {
         return false;
@@ -139,7 +139,7 @@ $(document).ready(function() {
 
 /**
 Form.Element.AfterActivity = function(element, callback, delay) {
-  element = $(element);
+  element = jQuery(element);
   if (!delay) delay = 0.25;
   new Form.Element.Observer(element, delay, function(element, value) {
     // TODO: display loading indicator
@@ -161,7 +161,7 @@ RecordSelect.notify = function(item) {
   if (onselect)
   {
     try {
-      var label = $.trim(item.find('label').first().text());
+      var label = jQuery.trim(item.find('label').first().text());
       if (!label) label = item.text();
       onselect(item.parent().attr('id').substr(2), label, e);
     } catch(e) {
@@ -173,7 +173,7 @@ RecordSelect.notify = function(item) {
 }
 
 RecordSelect.render_page = function(record_select_id, page) {
-  $('#' + record_select_id + ' ol').first().replaceWith(page);
+  jQuery('#' + record_select_id + ' ol').first().replaceWith(page);
 };
 
 RecordSelect.Abstract = Class.extend({
@@ -184,7 +184,7 @@ RecordSelect.Abstract = Class.extend({
    */
   init: function(obj, url, options) {
     if (typeof(obj) == 'string') obj = '#' + obj;
-    this.obj = $(obj);
+    this.obj = jQuery(obj);
     this.url = url;
     this.options = options;
     this.container;
@@ -195,7 +195,7 @@ RecordSelect.Abstract = Class.extend({
     if (RecordSelect.document_loaded) {
       this.onload();
     } else {
-      var _this = this; $(document).ready(function() { _this.onload(); })
+      var _this = this; jQuery(document).ready(function() { _this.onload(); })
     }
   },
 
@@ -219,7 +219,7 @@ RecordSelect.Abstract = Class.extend({
   open: function() {
     if (this.is_open()) return;
     var _this = this;
-    $.ajax({
+    jQuery.ajax({
       url: this.url,
       //type: "POST",
       //data: options['params'],
@@ -227,7 +227,7 @@ RecordSelect.Abstract = Class.extend({
       success: function(data){
         _this.container.html(data);
         _this.show();
-        $(document.body).mousedown(jQuery.proxy(_this, "onbodyclick"));
+        jQuery(document.body).mousedown(jQuery.proxy(_this, "onbodyclick"));
       }
     });
   },
@@ -239,8 +239,8 @@ RecordSelect.Abstract = Class.extend({
     var offset = this.obj.offset(), top = this.obj.height() + offset.top;
     this.container.show();
     this.container.css('left', offset.left);
-    if (top + this.container.height() > $(window).height())
-      this.container.css('bottom', $(window).height() - offset.top);
+    if (top + this.container.height() > jQuery(window).height())
+      this.container.css('bottom', jQuery(window).height() - offset.top);
     else this.container.css('top', top);
 
     if (this._use_iframe_mask()) {
@@ -274,7 +274,7 @@ RecordSelect.Abstract = Class.extend({
    * returns true/false for whether the recordselect is open
    */
   is_open: function() {
-	  return (!($.trim(this.container.html()).length == 0))
+	  return (!(jQuery.trim(this.container.html()).length == 0))
   },
 
   /**
@@ -282,7 +282,7 @@ RecordSelect.Abstract = Class.extend({
    */
   onbodyclick: function(event) {
     if (!this.is_open()) return;
-    if (this.container.has($(event.target)).length > 0) {
+    if (this.container.has(jQuery(event.target)).length > 0) {
       return;
     } else if (!this.obj.is(event.target)) {
       this.close();
@@ -293,10 +293,10 @@ RecordSelect.Abstract = Class.extend({
    * creates and initializes (and returns) the recordselect container
    */
   create_container: function() {
-    var e = $("<div />", {'class': "record-select-container record-select-handler"});
+    var e = jQuery("<div />", {'class': "record-select-container record-select-handler"});
     e.css('display', 'none')
-    $(document.body).append(e);
-    e.get(0).onselect = $.proxy(this, "onselect")
+    jQuery(document.body).append(e);
+    e.get(0).onselect = jQuery.proxy(this, "onselect")
     return e;
   },
   
@@ -310,14 +310,14 @@ RecordSelect.Abstract = Class.extend({
    */
   _respond_to_text_field: function(text_field) {
     // attach the events to start this party
-    text_field.focus($.proxy(this, 'open'));
+    text_field.focus(jQuery.proxy(this, 'open'));
 
     // the autosearch event - needs to happen slightly late (keyup is later than keypress)
-    text_field.keyup($.proxy(this, 'onkeyup'));
+    text_field.keyup(jQuery.proxy(this, 'onkeyup'));
 
     // keyboard navigation, if available
     if (this.onkeydown) {
-      text_field.keydown($.proxy(this, "onkeydown"));
+      text_field.keydown(jQuery.proxy(this, "onkeydown"));
     }
   },
 
@@ -331,7 +331,7 @@ RecordSelect.Abstract = Class.extend({
 /**
  * Adds keyboard navigation to RecordSelect objects
  */
-$.extend(RecordSelect.Abstract.prototype, {
+jQuery.extend(RecordSelect.Abstract.prototype, {
   current: null,
 
   /**
@@ -375,7 +375,7 @@ $.extend(RecordSelect.Abstract.prototype, {
    */
   highlight: function(obj) {
     if (this.current) this.current.removeClass('current');
-    this.current = $(obj);
+    this.current = jQuery(obj);
     obj.addClass('current');
   }
 });
@@ -387,8 +387,8 @@ $.extend(RecordSelect.Abstract.prototype, {
 RecordSelect.Dialog = RecordSelect.Abstract.extend({
   onload: function() {
     this.container = this.create_container();
-    this.obj.click($.proxy(this, "toggle"));
-    if (this.onkeypress) this.obj.keypress($.proxy(this, 'onkeypress'));
+    this.obj.click(jQuery.proxy(this, "toggle"));
+    if (this.onkeypress) this.obj.keypress(jQuery.proxy(this, 'onkeypress'));
   },
 
   onselect: function(id, value) {
@@ -506,7 +506,7 @@ RecordSelect.Multiple = RecordSelect.Abstract.extend({
     this.container.addClass('record-select-autocomplete');
 
     // decide where the <li> entries should be placed
-    if (this.options.list) this.list_container = $(this.options.list);
+    if (this.options.list) this.list_container = jQuery(this.options.list);
     else this.list_container = this.obj.next('ul');
 
     // take the input name from the text input, and store it for this.add()
@@ -534,7 +534,7 @@ RecordSelect.Multiple = RecordSelect.Abstract.extend({
     if (this.list_container.has('input[value=' + id + ']').length > 0) return;
 
     var entry = '<li>'
-              + '<a href="#" onclick="$(this).parent().remove(); return false;" class="remove">remove</a>'
+              + '<a href="#" onclick="jQuery(this).parent().remove(); return false;" class="remove">remove</a>'
               + '<input type="hidden" name="' + this.input_name + '" value="' + id + '" />'
               + '<label>' + label + '</label>'
               + '</li>';

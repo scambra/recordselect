@@ -12,8 +12,8 @@
       $(<%= record_select_search_id.to_json.html_safe -%>).down('input.search_submit').click();
   }, 0.35);
 <% elsif RecordSelect::Config.js_framework == :jquery %>
-  $(<%= "##{record_select_search_id}".to_json.html_safe %>).find('input.text-input').delayedObserver(0.35, function() {
-     $(<%= "##{record_select_search_id}".to_json.html_safe %>).trigger("submit");});
+  jQuery(<%= "##{record_select_search_id}".to_json.html_safe %>).find('input.text-input').delayedObserver(0.35, function() {
+     jQuery(<%= "##{record_select_search_id}".to_json.html_safe %>).trigger("submit");});
 <% end %>
   //]]>
 </script>
