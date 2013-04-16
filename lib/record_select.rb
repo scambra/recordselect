@@ -27,7 +27,14 @@ module RecordSelect
       self.send :include, RecordSelect::Conditions
     end
 
-    attr_reader :record_select_config
+    def record_select_config
+      case
+      when defined?(@record_select_config)
+        @record_select_config
+      when superclass.respond_to?(:record_select_config)
+        superclass.record_select_config
+      end
+    end
 
     def uses_record_select?
       !record_select_config.nil?
