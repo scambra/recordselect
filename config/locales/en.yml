@@ -1,6 +1,6 @@
 en:
   record_select:
-    searching: "Buscando"
+    searching: "Searching"
     next: "Next"
     next_items: "Next %{count}"
     previous: "Previous"
