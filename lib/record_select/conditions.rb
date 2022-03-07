@@ -60,9 +60,11 @@ module RecordSelect
     # generate conditions from the url parameters (e.g. users/browse?group_id=5)
     def record_select_conditions_from_params
       conditions = []
+      ignored_columns = %w[controller action page search update]
       params.each do |field, value|
-        next unless column = record_select_config.model.columns_hash[field]
-        conditions << record_select_condition_for_column(column, value)
+        next if field.in? ignored_columns
+        column = record_select_config.model.columns_hash[field]
+        conditions << record_select_condition_for_column(column, value) if column
       end
       conditions
     end
