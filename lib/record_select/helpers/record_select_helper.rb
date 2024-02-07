@@ -46,18 +46,22 @@ module RecordSelectHelper
     options[:id] ||= name.gsub(/[\[\]]/, '_')
     options[:class] ||= ''
     options[:class] << ' recordselect'
+    options[:clear_button] = true unless options.include? :clear_button
 
     controller = assert_controller_responds(options.delete(:controller))
     params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path)}
     record_select_options[:field_name] = options.delete(:field_name) if options[:field_name]
+    clear_button_class = 'clear-input-button'
     if current and not current.new_record?
       record_select_options[:id] = current.id
       record_select_options[:label] = label_for_field(current, controller)
+      clear_button_class << ' enabled'
     end
     record_select_options.merge! options[:rs] if options[:rs]
 
     html = text_field_tag(name, nil, options.merge(:autocomplete => 'off', :onfocus => "this.focused=true", :onblur => "this.focused=false"))
+    html << button_tag('x', type: :reset, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if options[:clear_button]
     url = url_for({:action => :browse, :controller => controller.controller_path}.merge(params))
     html << javascript_tag("new RecordSelect.Single(#{options[:id].to_json}, #{url.to_json}, #{record_select_options.to_json});")
 
