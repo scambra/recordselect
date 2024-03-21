@@ -61,7 +61,7 @@ module RecordSelectHelper
     record_select_options.merge! options[:rs] if options[:rs]
 
     html = text_field_tag(name, nil, options.merge(:autocomplete => 'off', :onfocus => "this.focused=true", :onblur => "this.focused=false"))
-    html << button_tag('x', type: :reset, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if options[:clear_button]
+    html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if options[:clear_button]
     url = url_for({:action => :browse, :controller => controller.controller_path}.merge(params))
     html << javascript_tag("new RecordSelect.Single(#{options[:id].to_json}, #{url.to_json}, #{record_select_options.to_json});")
 
