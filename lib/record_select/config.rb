@@ -11,6 +11,7 @@ module RecordSelect
       @label = options[:label]
       @include = options[:include]
       @pagination = options.include?(:pagination) ? options[:pagination] : true
+      @toggle_search_mode = options[:toggle_search_mode]
     end
     
     def self.js_framework=(framework)
@@ -57,6 +58,10 @@ module RecordSelect
 
     def full_text_search?
       @full_text_search ? true : false
+    end
+
+    def toggle_search_mode?
+      @toggle_search_mode ? true : false
     end
 
     def include

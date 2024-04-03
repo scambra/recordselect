@@ -148,6 +148,10 @@ module RecordSelectHelper
     controller.send :record_select_config
   end
 
+  def full_text_search?
+    controller.send :full_text_search?
+  end
+
   # The id of the RecordSelect widget for the given controller.
   def record_select_id(controller = nil) #:nodoc:
     controller ||= params[:controller]

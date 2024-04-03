@@ -143,6 +143,9 @@ jQuery(document).ready(function() {
     if (jQuery(event.target).val()) $clear_button.addClass('enabled');
     else $clear_button.removeClass('enabled');
   });
+  jQuery(document).on('ajax:beforeSend', 'a.rs-mode', function() {
+    $(this).closest('.record-select').find('form input[name="rs_mode"]').val($(this).data('value'));
+  });
 });
 
 var RecordSelect = new Object();

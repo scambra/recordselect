@@ -38,14 +38,19 @@ module RecordSelect
     # override this if you want to customize the search routine
     def record_select_conditions_from_search
       if params[:search] && !params[:search].strip.empty?
-        if record_select_config.full_text_search?
+        if full_text_search?
           tokens = params[:search].strip.split(' ')
+          search_pattern = '%?%'
         else
           tokens = [params[:search].strip]
+          search_pattern = '?%'
         end
-        search_pattern = record_select_config.full_text_search? ? '%?%' : '?%'
         build_record_select_conditions(tokens, record_select_like_operator, search_pattern)
       end
+    end
+
+    def full_text_search?
+      record_select_config.full_text_search? && params[:rs_mode].blank? || params[:rs_mode] == 'contains'
     end
     
     def build_record_select_conditions(tokens, operator, search_pattern)

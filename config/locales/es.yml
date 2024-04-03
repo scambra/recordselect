@@ -12,3 +12,5 @@ es:
     records_found:
       one: "1 %{model} encontrado"
       other: "%{count} %{model} encontrados"
+    contains: "Buscar contiene"
+    begins: "Buscar empieza por"

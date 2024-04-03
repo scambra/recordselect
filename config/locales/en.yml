@@ -8,3 +8,5 @@ en:
     records_found:
       one: "1 %{model} found"
       other: "%{count} %{model} found"
+    contains: "Contains search"
+    begins: "Begins search"

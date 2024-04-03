@@ -1,2 +1,2 @@
-RecordSelect.render_page('<%= record_select_id %>', '<%= escape_javascript(render_record_select(:partial => 'list', :locals => {:page => @page})) %>');
-<%= render_record_select(:partial => 'highlight', :formats => [:js]) %>
+RecordSelect.render_page('<%= record_select_id %>', '<%= escape_javascript(render_record_select(partial: 'list', locals: {page: @page})) %>');
+<%= render_record_select(partial: 'highlight', formats: [:js]) %>

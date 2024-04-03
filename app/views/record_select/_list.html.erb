@@ -2,19 +2,26 @@
 controller ||= params[:controller]
 
 permit_fields = [:search] + (permit_rs_browse_params || [])
-pagination_url_params = params.permit(*permit_fields).merge(:controller => controller, :action => :browse, :search => params[:search], :update => 1)
-prev_url = url_for(pagination_url_params.merge(:page => page.prev.number)) if page.prev?
-next_url = url_for(pagination_url_params.merge(:page => page.next.number)) if page.next?
+permit_fields << :rs_mode if record_select_config.toggle_search_mode?
+pagination_url_params = params.permit(*permit_fields).merge(controller: controller, action: :browse, search: params[:search], update: 1)
+prev_url = url_for(pagination_url_params.merge(page: page.prev.number)) if page.prev?
+next_url = url_for(pagination_url_params.merge(page: page.next.number)) if page.next?
 -%>
-<%= content_tag :ol, :class => ('scrollable' unless record_select_config.pagination?) do %>
-  <%= content_tag :li, rs_(:records_found, :count => page.pager.count,
-:model => record_select_config.model.model_name.human(:count => page.pager.count).downcase), class: 'found', data: {searching: rs_(:searching)} %>
+<%= content_tag :ol, class: ('scrollable' unless record_select_config.pagination?) do %>
+  <%= content_tag :li, class: 'found', data: {searching: rs_(:searching)} do %>
+    <%= rs_(:records_found,
+            count: page.pager.count,
+            model: record_select_config.model.model_name.human(:count => page.pager.count).downcase) %>
+    <% if record_select_config.toggle_search_mode? %>
+      <% rs_mode = full_text_search? ? 'begins' : 'contains' %>
+      <%= link_to rs_(rs_mode), pagination_url_params.merge(rs_mode: rs_mode),
+                  class: 'rs-mode', method: :get, remote: true, data: {value: rs_mode} %>
+    <% end %>
+  <% end %>
   <% if page.prev? -%>
   <li class="pagination previous">
-    <%= link_to image_tag('record_select/previous.gif', :alt => rs_(:previous)) + " " + rs_(:previous_items,
-:count => page.pager.per_page),
-                      {:url => prev_url},
-                      {:href => prev_url, :method => :get, :remote => true} %>
+    <%= link_to image_tag('record_select/previous.gif', alt: rs_(:previous)) + " " + rs_(:previous_items, count: page.pager.per_page),
+                prev_url, method: :get, remote: true %>
   </li>
   <% end -%>
   <% page.items.each do |record| -%>
@@ -24,9 +31,8 @@ next_url = url_for(pagination_url_params.merge(:page => page.next.number)) if pa
   <% end -%>
   <% if record_select_config.pagination? && page.next? -%>
   <li class="pagination next">
-  <%= link_to (rs_(:next_items, :count => page.pager.per_page) + " " + image_tag('record_select/next.gif', :alt => rs_(:next))).html_safe,
-                        {:url => next_url},
-                        {:href => next_url, :method => :get, :remote => true} %>
+  <%= link_to safe_join([rs_(:next_items, count: page.pager.per_page), image_tag('record_select/next.gif', alt: rs_(:next))], ' '),
+              next_url, method: :get, remote: true %>
   </li>
   <% end -%>
 <% end %>
