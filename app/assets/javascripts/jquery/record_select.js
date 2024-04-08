@@ -235,7 +235,7 @@ RecordSelect.Abstract = Class.extend({
   open: function() {
     if (this.is_open()) return;
     var _this = this;
-    jQuery.rails.fire(_this.obj, 'recordselect:before');
+    jQuery.rails.fire(_this.obj, 'recordselect:before', this);
     _this.create_form();
     _this.container.show();
     var params = _this.obj.data('params'), text = _this.obj.val();
