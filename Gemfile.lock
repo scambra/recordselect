@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    recordselect (3.10.8)
+    recordselect (3.10.9)
       rails (>= 4.0.0)
 
 GEM
