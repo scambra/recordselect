@@ -4,6 +4,10 @@ module RecordSelectHelper
   def permit_rs_browse_params
   end
 
+  def record_select_js(type:, id:, url:, options:)
+    javascript_tag("new RecordSelect.#{type}(#{id.to_json}, #{url.to_json}, #{options.to_json});")
+  end
+
   # Adds a link on the page that toggles a RecordSelect widget from the given controller.
   #
   # *Options*
@@ -22,10 +26,12 @@ module RecordSelectHelper
     record_select_options = {id: record_select_id(controller.controller_path), onselect: options[:onselect] || ''}
     record_select_options.merge! options[:rs] if options[:rs]
 
+    rs_data = {type: 'Dialog', id: options[:html][:id], url: url_for(options[:params]), options: record_select_options}
+    options[:html][:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
     html = link_to(name, '#', options[:html])
-    html << javascript_tag("new RecordSelect.Dialog(#{options[:html][:id].to_json}, #{url_for(options[:params]).to_json}, #{record_select_options.to_json});")
+    html << record_select_js(**rs_data) if request.xhr?
 
-    return html
+    html
   end
 
   # Adds a RecordSelect-based form field. The field submits the record's id using a hidden input.
@@ -58,14 +64,18 @@ module RecordSelectHelper
       record_select_options[:label] = label_for_field(current, controller)
       clear_button_class << ' enabled'
     end
-    record_select_options.merge! options[:rs] if options[:rs]
+    record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    html = text_field_tag(name, nil, options.merge(:autocomplete => 'off', :onfocus => "this.focused=true", :onblur => "this.focused=false"))
-    html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if options[:clear_button]
-    url = url_for({:action => :browse, :controller => controller.controller_path}.merge(params))
-    html << javascript_tag("new RecordSelect.Single(#{options[:id].to_json}, #{url.to_json}, #{record_select_options.to_json});")
+    clear_button = options.delete(:clear_button)
+    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
+    rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    html = text_field_tag(name, nil, options)
+    html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if clear_button
+    html << record_select_js(**rs_data) if request.xhr?
 
-    return html
+    html
   end
 
   # Adds a RecordSelect-based form field. The field is autocompleted.
@@ -92,13 +102,16 @@ module RecordSelectHelper
     if current
       record_select_options[:label] ||= label_for_field(current, controller)
     end
-    record_select_options.merge! options[:rs] if options[:rs]
+    record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    html = text_field_tag(name, nil, options.merge(:autocomplete => 'off', :onfocus => "this.focused=true", :onblur => "this.focused=false"))
-    url = url_for({:action => :browse, :controller => controller.controller_path}.merge(params))
-    html << javascript_tag("new RecordSelect.Autocomplete(#{options[:id].to_json}, #{url.to_json}, #{record_select_options.to_json});")
+    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
+    rs_data = {type: 'Autocomplete', id: options[:id], url: url, options: record_select_options}
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    html = text_field_tag(name, nil, options)
+    html << record_select_js(**rs_data) if request.xhr?
 
-    return html
+    html
   end
 
   # Adds a RecordSelect-based form field for multiple selections. The values submit using a list of hidden inputs.
@@ -124,16 +137,18 @@ module RecordSelectHelper
     params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path)}
     record_select_options[:current] = current.inject([]) { |memo, record| memo.push({:id => record.id, :label => label_for_field(record, controller)}) }
-    record_select_options.merge! options[:rs] if options[:rs]
+    record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    html = text_field_tag("#{name}[]", nil, options.merge(:autocomplete => 'off', :onfocus => "this.focused=true", :onblur => "this.focused=false"))
-    html << hidden_field_tag("#{name}[]", '', :id => nil)
-    html << content_tag('ul', '', :class => 'record-select-list');
+    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
+    rs_data = {type: 'Multiple', id: options[:id], url: url, options: record_select_options}
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    html = text_field_tag("#{name}[]", nil, options)
+    html << hidden_field_tag("#{name}[]", '', id: nil)
+    html << content_tag(:ul, '', class: 'record-select-list')
+    html << record_select_js(**rs_data) if request.xhr?
 
-    url = url_for({:action => :browse, :controller => controller.controller_path}.merge(params))
-    html << javascript_tag("new RecordSelect.Multiple(#{options[:id].to_json}, #{url.to_json}, #{record_select_options.to_json});")
-
-    return html
+    html
   end
 
   # A helper to render RecordSelect partials

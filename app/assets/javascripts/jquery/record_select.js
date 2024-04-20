@@ -102,6 +102,7 @@ if (typeof(jQuery.fn.delayedObserver) === 'undefined') {
 
 jQuery(document).ready(function() {
   RecordSelect.document_loaded = true;
+  jQuery('[data-rs-type]').each(function() { RecordSelect.from_attributes(jQuery(this)); });
   jQuery(document).on('click', 'div.record-select li.record', function(event) {
     var link = jQuery(this);
     if (link.length) {
@@ -150,6 +151,11 @@ jQuery(document).ready(function() {
 
 var RecordSelect = new Object();
 RecordSelect.document_loaded = false;
+
+RecordSelect.from_attributes = function(item) {
+  rs_class = RecordSelect[item.data('rs-type')];
+  new rs_class(item.data('rs-id'), item.data('rs-url'), item.data('rs-options'));
+}
 
 RecordSelect.select_item = function(item) {
   var rs = item.closest('.record-select-handler').data('recordselect');
