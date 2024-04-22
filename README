@@ -3,9 +3,45 @@ RecordSelect
 
 (c) 2007 - 2016 Sergio Cambra, Lance Ivy
 
-RecordSelect is a Rails widget to help you pick one record out of many. I designed it as a more usable and performant alternative to generating a massive dropdown list. It relies on AJAX for the cooler uses (all the provided view helpers rely on JavaScript?) but can also function in a pure-http fashion (although multi-select support is provided in a pure-JavaScript implementation).
+RecordSelect is a Rails widget to help you pick one record out of many. I designed it as a more usable and performant alternative to generating a massive dropdown list. It relies on AJAX, powered by jQuery, so jQuery must be loaded first, either from jquery-rails gem or just loading the JS in the assets pipeline, or imported before importing record_select if using importmap.
 
 Please see the ActionView::Helpers::RecordSelectHelpers for the most common API. More documentation (and HOWTOs) can be found online at the wiki.
+
+= USAGE WITH ASSETS PIPELINE
+
+Add to application.js
+
+```js
+//= require jquery
+//= require record_select
+```
+
+= USAGE WITH IMPORTMAP
+
+Add to importmap.rb
+
+```rb
+pin "jquery"
+pin "record_select"
+```
+
+Add to app/assets/config/manifest.js
+
+```js
+//= link jquery.js
+//= link record_select.js
+```
+
+Add to app/javascript/application.js
+
+```js
+import 'jquery'
+import 'record_select'
+```
+
+= USAGE WITH ACTIVE_SCAFFOLD
+
+Either using assets pipeline or importmap, it will be loaded when requiring or importing active_scaffold, so no need to add it to application.js, importmap.rb or manifest.js
 
 = DEPENDENCIES
 This depends on the excellent Paginator gem by Bruce Williams. This simple gem is available at paginator.rubyforge.org.

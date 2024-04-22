@@ -13,18 +13,6 @@ module RecordSelect
       @pagination = options.include?(:pagination) ? options[:pagination] : true
       @toggle_search_mode = options[:toggle_search_mode]
     end
-    
-    def self.js_framework=(framework)
-      @@js_framework = framework
-    end
-    
-    def self.js_framework
-      @@js_framework ||= if defined? Jquery
-        :jquery
-      elsif defined? PrototypeRails
-        :prototype
-      end
-    end
 
     def pagination?
       @pagination

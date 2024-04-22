@@ -1,6 +1,6 @@
 module RecordSelect
   class Engine < Rails::Engine
-    initializer 'active_scaffold.action_controller' do
+    initializer 'recordselect.action_controller' do
       ActiveSupport.on_load :action_controller do
         include RecordSelect
       end
