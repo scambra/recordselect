@@ -142,7 +142,7 @@
           rs.current_xhr = null;
         }
       });
-      jQuery(document).on('click', 'input.recordselect ~ .clear-input-button', function() {
+      jQuery(document).on('click', 'input.recordselect ~ .clear-input-button', function(event) {
         var $clear_button = jQuery(event.target), $input = $clear_button.prevAll('input');
         if (!$input.length) return;
         $input.val('').removeClass('selected');
@@ -227,7 +227,8 @@
         if (RecordSelect.document_loaded) {
           this.onload();
         } else {
-          var _this = this; jQuery(document).ready(function() { _this.onload(); })
+          var _this = this;
+          jQuery(document).ready(function() { _this.onload(); });
         }
       },
 
