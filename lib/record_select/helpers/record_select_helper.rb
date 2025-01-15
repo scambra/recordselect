@@ -21,15 +21,16 @@ module RecordSelectHelper
     options[:onselect] = "(function(id, label) {#{options[:onselect]}})" if options[:onselect]
     options[:html] ||= {}
     options[:html][:id] ||= "rs_#{rand(9999)}"
+    js = options.include?(:js) ? options[:js] : request.xhr?
 
     controller = assert_controller_responds(options[:params][:controller])
     record_select_options = {id: record_select_id(controller.controller_path), onselect: options[:onselect] || ''}
     record_select_options.merge! options[:rs] if options[:rs]
 
     rs_data = {type: 'Dialog', id: options[:html][:id], url: url_for(options[:params]), options: record_select_options}
-    options[:html][:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    options[:html][:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
     html = link_to(name, '#', options[:html])
-    html << record_select_js(**rs_data) if request.xhr?
+    html << record_select_js(**rs_data) if js
 
     html
   end
@@ -53,6 +54,7 @@ module RecordSelectHelper
     options[:class] ||= ''
     options[:class] << ' recordselect'
     options[:clear_button] = true unless options.include? :clear_button
+    js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
     params = options.delete(:params)
@@ -70,10 +72,10 @@ module RecordSelectHelper
     options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
     html = text_field_tag(name, nil, options)
     html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if clear_button
-    html << record_select_js(**rs_data) if request.xhr?
+    html << record_select_js(**rs_data) if js
 
     html
   end
@@ -95,6 +97,7 @@ module RecordSelectHelper
     options[:id] ||= name.gsub(/[\[\]]/, '_')
     options[:class] ||= ''
     options[:class] << ' recordselect'
+    js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
     params = options.delete(:params)
@@ -107,9 +110,9 @@ module RecordSelectHelper
     options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Autocomplete', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
     html = text_field_tag(name, nil, options)
-    html << record_select_js(**rs_data) if request.xhr?
+    html << record_select_js(**rs_data) if js
 
     html
   end
@@ -132,6 +135,7 @@ module RecordSelectHelper
     options[:class] ||= ''
     options[:class] << ' recordselect'
     options.delete(:name)
+    js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
     params = options.delete(:params)
@@ -142,11 +146,11 @@ module RecordSelectHelper
     options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Multiple', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless request.xhr?
+    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
     html = text_field_tag("#{name}[]", nil, options)
     html << hidden_field_tag("#{name}[]", '', id: nil)
     html << content_tag(:ul, '', class: 'record-select-list')
-    html << record_select_js(**rs_data) if request.xhr?
+    html << record_select_js(**rs_data) if js
 
     html
   end

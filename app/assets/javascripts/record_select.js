@@ -163,8 +163,9 @@
     RecordSelect.document_loaded = false;
 
     RecordSelect.from_attributes = function(item) {
+      if (item.prop('disabled')) return;
       var rs_class = RecordSelect[item.data('rs-type')];
-      new rs_class(item.data('rs-id'), item.data('rs-url'), item.data('rs-options'));
+      new rs_class(item.data('rs-id') || item, item.data('rs-url'), item.data('rs-options'));
     }
 
     RecordSelect.select_item = function(item) {
