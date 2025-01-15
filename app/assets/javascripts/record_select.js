@@ -337,7 +337,7 @@
        * returns true/false for whether the recordselect is open
        */
       is_open: function() {
-        return jQuery.trim(this.container.html()).length != 0;
+        return this.container.children().length != 0;
       },
 
       /**
