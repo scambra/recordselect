@@ -45,7 +45,3 @@ Either using assets pipeline or importmap, it will be loaded when requiring or i
 
 = DEPENDENCIES
 This depends on the excellent Paginator gem by Bruce Williams. This simple gem is available at paginator.rubyforge.org.
-
-It should autoselect js framework, but you can select :jquery or :prototype framework with config/initializer file:
-RecordSelect::Config.js_framework = :jquery
-RecordSelect::Config.js_framework = :prototype
