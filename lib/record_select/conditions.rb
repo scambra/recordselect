@@ -7,8 +7,6 @@ module RecordSelect
     # * intelligent url params (e.g. params[:first_name] if first_name is a model column)
     # * specific conditions supplied by the developer
     def record_select_conditions
-      conditions = []
-
       [
         record_select_conditions_from_search,
         *record_select_conditions_from_params,

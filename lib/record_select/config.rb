@@ -9,10 +9,14 @@ module RecordSelect
       @order_by = options[:order_by]
       @full_text_search = options[:full_text_search]
       @label = options[:label]
+      @joins = options[:joins]
+      @left_joins = options[:left_joins]
       @include = options[:include]
       @pagination = options.include?(:pagination) ? options[:pagination] : true
       @toggle_search_mode = options[:toggle_search_mode]
     end
+
+    attr_reader :include, :joins, :left_joins
 
     def pagination?
       @pagination
@@ -50,10 +54,6 @@ module RecordSelect
 
     def toggle_search_mode?
       @toggle_search_mode ? true : false
-    end
-
-    def include
-      @include
     end
 
     # If a proc, must accept the record as an argument and return a descriptive string.

@@ -3,12 +3,7 @@ module RecordSelect
     # :method => :get
     # params => [:page, :search]
     def browse
-      conditions = record_select_conditions
-      user_includes = record_select_includes
-      query = conditions.inject(record_select_model.includes(user_includes)) do |query, cond|
-        query.where(cond)
-      end
-      query = query.references(user_includes) if Rails::VERSION::MAJOR >= 4 && user_includes.present?
+      query = record_select_query
       @count = query.count if record_select_config.pagination?
       @count = @count.length if @count.is_a? Hash
       pager = ::Paginator.new(@count, record_select_config.per_page) do |offset, per_page|
@@ -66,6 +61,15 @@ module RecordSelect
     end
 
     private
+
+    def record_select_query
+      query = record_select_model
+      user_includes = record_select_includes
+      query = query.includes(user_includes).references(user_includes) if user_includes.present?
+      query = query.joins(record_select_config.joins).distinct if record_select_config.joins.present?
+      query = query.left_joins(record_select_config.left_joins) if record_select_config.left_joins.present?
+      record_select_conditions.inject(query) { |query, cond| query.where(cond) }
+    end
 
     def record_select_views_path
       "record_select"
