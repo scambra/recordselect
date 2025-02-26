@@ -4,6 +4,6 @@ url_options = params.permit(*permit_fields).merge(controller: controller, action
 -%>
 <%= form_tag url_options, {method: :get, remote: true, id: record_select_search_id}  -%>
   <%= text_field_tag 'search', params[:search], autocomplete: 'off', class: 'text-input' %>
-  <%= hidden_field_tag 'rs_mode', params[:rs_mode] %>
+  <%= hidden_field_tag 'rs_mode', params[:rs_mode] if record_select_config.toggle_search_mode? %>
   <%= submit_tag 'search', class: "search_submit" %>
 </form>
