@@ -145,39 +145,49 @@ iframe.record-select-mask {
   margin-right: 5px;
 }
 
-.recordselect.selected {
-  background-color: #EFFFEF;
-  background-position: right 2px center;
-  background-image: image-url('record_select/accept.png');
-  background-repeat: no-repeat;
-  padding-right: 20px;
-}
+.recordselect {
+  &:has(~ .clear-input-button) {
+    padding-right: 20px;
+  }
+  &.selected {
+    background-color: #EFFFEF;
+    background-position: right 2px center;
+    background-image: image-url('record_select/accept.png');
+    background-repeat: no-repeat;
+    padding-right: 20px;
+    &:has(~ .clear-input-button) {
+      padding-right: 40px;
+    }
+    + input[type=hidden] + button.clear-input-button {
+      right: 40px;
+    }
+  }
 
-.recordselect + input[type=hidden] + button.clear-input-button {
-  /* button position */
-  position: relative;
-  right: 20px;
-  top: 3px;
-  /* button appearane */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23777'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>");
-  background-color: transparent;
-  width: 16px;
-  height: 16px;
-  appearance: none;
-  border: none;
-  border-radius: 50%;
-  margin: 0;
-  cursor: pointer;
-  text-indent: 20px;
-  overflow: hidden;
-  display: none;
-  &.enabled {
-    display: inline-block;
+  .recordselect.selected
+
+  + input[type=hidden] + button.clear-input-button {
+    /* button position */
+    position: relative;
+    right: 20px;
+    top: 3px;
+    /* button appearane */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23777'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>");
+    background-color: transparent;
+    width: 16px;
+    height: 16px;
+    appearance: none;
+    border: none;
+    border-radius: 50%;
+    margin: 0;
+    cursor: pointer;
+    text-indent: 20px;
+    overflow: hidden;
+    display: none;
+    &.enabled {
+      display: inline-block;
+    }
+    &:hover {
+      background-color: lightgray;
+    }
   }
-  &:hover {
-    background-color: lightgray;
-  }
-}
-.recordselect.selected + input[type=hidden] + button.clear-input-button {
-  right: 40px;
 }
