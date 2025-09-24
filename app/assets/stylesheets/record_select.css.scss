@@ -189,3 +189,22 @@ iframe.record-select-mask {
     }
   }
 }
+
+@supports (position-anchor: --recordselect) {
+  .recordselect {
+    &:has(~ .clear-input-button) {
+      anchor-name: --recordselect;
+    }
+    &.selected + input[type=hidden] + button.clear-input-button {
+        margin-left: -40px;
+    }
+
+    + input[type=hidden] + button.clear-input-button {
+      /* button position */
+      position: absolute;
+      position-area: right;
+      position-anchor: --recordselect;
+      margin-left: -20px;
+    }
+  }
+}
