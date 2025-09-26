@@ -51,7 +51,7 @@ module RecordSelectHelper
     options[:controller] ||= current.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= ''
+    options[:class] ||= String.new
     options[:class] << ' recordselect'
     options[:clear_button] = true unless options.include? :clear_button
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
@@ -64,7 +64,7 @@ module RecordSelectHelper
     if current and not current.new_record?
       record_select_options[:id] = current.id
       record_select_options[:label] = label_for_field(current, controller)
-      clear_button_class << ' enabled'
+      clear_button_class += ' enabled'
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
@@ -95,7 +95,7 @@ module RecordSelectHelper
     options[:controller] ||= current.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= ''
+    options[:class] ||= String.new
     options[:class] << ' recordselect'
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
@@ -132,7 +132,7 @@ module RecordSelectHelper
     options[:controller] ||= current.first.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= ''
+    options[:class] ||= String.new
     options[:class] << ' recordselect'
     options.delete(:name)
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
