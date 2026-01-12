@@ -191,6 +191,9 @@ iframe.record-select-mask {
 }
 
 @supports (position-anchor: --recordselect) {
+  *:has(> .recordselect) {
+    anchor-scope: --recordselect;
+  }
   .recordselect {
     &:has(~ .clear-input-button) {
       anchor-name: --recordselect;
