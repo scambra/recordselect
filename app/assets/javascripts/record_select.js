@@ -164,7 +164,8 @@
 
     RecordSelect.from_attributes = function(item) {
       if (item.prop('disabled')) return;
-      var rs_class = RecordSelect[item.data('rs-type')];
+      var rs_class = RecordSelect[item.attr('data-rs-type')];
+      item.removeAttr('data-rs-type'); // prevent double initialization
       new rs_class(item.data('rs-id') || item, item.data('rs-url'), item.data('rs-options'));
     }
 
