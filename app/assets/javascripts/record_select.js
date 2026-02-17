@@ -155,7 +155,7 @@
         else $clear_button.removeClass('enabled');
       });
       jQuery(document).on('ajax:beforeSend', 'a.rs-mode', function() {
-        $(this).closest('.record-select').find('form input[name="rs_mode"]').val($(this).data('value'));
+        jQuery(this).closest('.record-select').find('form input[name="rs_mode"]').val(jQuery(this).data('value'));
       });
     });
 
@@ -292,7 +292,7 @@
         this.container.css('left', offset.left);
         this.container.css('top', '');
         this.container.css('bottom', '');
-        if (this.above || (this.fixed || this.body_static) && top + height > window_height) {
+        if (this.above || this.fixed && top + height > window_height) {
           this.container.css('bottom', window_height - offset.top);
         } else {
           var below_space = window_height-(top-scroll), above_space = offset.top - scroll, position;
@@ -302,23 +302,11 @@
           } else position = 'top';
           if (position == 'top') this.container.css('top', top);
           else {
-            var bottom = document_height - offset.top, body_height = $(document.body).height();
+            var bottom = document_height - offset.top,
+              body_height = this.body_static ? window_height : jQuery(document.body).height();
             if (body_height < document_height) bottom -= document_height - body_height;
             this.container.css('bottom', bottom);
           }
-        }
-
-        if (this._use_iframe_mask()) {
-          this.container.after('<iframe src="javascript:false;" class="record-select-mask" />');
-          var mask = this.container.next('iframe');
-          mask.css('left', this.container.css('left'))
-            .css('top', this.container.css('top'));
-        }
-
-        if (this._use_iframe_mask()) {
-          var dimensions = this.container.children().first();
-          mask.css('width', dimensions.css('width'))
-            .css('height', dimensions.css('height'));
         }
       },
 
@@ -326,10 +314,6 @@
        * closes the recordselect by emptying the container
        */
       close: function() {
-        if (this._use_iframe_mask()) {
-          this.container.next('iframe').remove();
-        }
-
         this.container.hide();
         // hopefully by using remove() instead of innerHTML we won't leak memory
         this.container.children().remove();
@@ -421,10 +405,6 @@
         if (this.onkeydown) {
           text_field.keydown(jQuery.proxy(this, "onkeydown"));
         }
-      },
-
-      _use_iframe_mask: function() {
-        return this.container.insertAdjacentHTML ? true : false;
       }
     });
 
