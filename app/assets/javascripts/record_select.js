@@ -110,6 +110,9 @@
       })(jQuery);
     }
 
+    window.RecordSelect = new Object();
+    RecordSelect.document_loaded = false;
+
     jQuery(document).ready(function() {
       RecordSelect.document_loaded = true;
       jQuery('[data-rs-type]').each(function() { RecordSelect.from_attributes(jQuery(this)); });
@@ -158,9 +161,6 @@
         jQuery(this).closest('.record-select').find('form input[name="rs_mode"]').val(jQuery(this).data('value'));
       });
     });
-
-    window.RecordSelect = new Object();
-    RecordSelect.document_loaded = false;
 
     RecordSelect.from_attributes = function(item) {
       if (item.prop('disabled')) return;
