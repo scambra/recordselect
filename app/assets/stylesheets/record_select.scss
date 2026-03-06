@@ -139,7 +139,7 @@ iframe.record-select-mask {
   width: 0px;
   height: 16px;
   padding-left: 16px;
-  background: image-url('record_select/cross.gif') no-repeat 0 0;
+  background: url('record_select/cross.gif') no-repeat 0 0;
   overflow: hidden;
   float: left;
   margin-right: 5px;
@@ -152,7 +152,7 @@ iframe.record-select-mask {
   &.selected {
     background-color: #EFFFEF;
     background-position: right 2px center;
-    background-image: image-url('record_select/accept.png');
+    background-image: url('record_select/accept.png');
     background-repeat: no-repeat;
     padding-right: 20px;
     &:has(~ .clear-input-button) {
