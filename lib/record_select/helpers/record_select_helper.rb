@@ -5,7 +5,7 @@ module RecordSelectHelper
   end
 
   def record_select_js(type:, id:, url:, options:)
-    javascript_tag("new RecordSelect.#{type}(#{id.to_json}, #{url.to_json}, #{options.to_json});")
+    javascript_tag("new RecordSelect.#{type}(#{id.to_json}, #{url.to_json}, #{options.to_json});", nonce: true)
   end
 
   # Adds a link on the page that toggles a RecordSelect widget from the given controller.
