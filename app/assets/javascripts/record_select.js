@@ -160,6 +160,12 @@
       jQuery(document).on('ajax:beforeSend', 'a.rs-mode', function() {
         jQuery(this).closest('.record-select').find('form input[name="rs_mode"]').val(jQuery(this).data('value'));
       });
+      jQuery(document).on('focus', 'input.recordselect', function() {
+        jQuery(this).prop('focused', true);
+      });
+      jQuery(document).on('blur', 'input.recordselect', function() {
+        jQuery(this).prop('focused', false);
+      });
     });
 
     RecordSelect.from_attributes = function(item) {

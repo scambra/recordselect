@@ -69,7 +69,7 @@ module RecordSelectHelper
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
     clear_button = options.delete(:clear_button)
-    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    options[:autocomplete] = 'off'
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
     options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
@@ -107,7 +107,7 @@ module RecordSelectHelper
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    options[:autocomplete] = 'off'
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Autocomplete', id: options[:id], url: url, options: record_select_options}
     options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
@@ -143,7 +143,7 @@ module RecordSelectHelper
     record_select_options[:current] = current.inject([]) { |memo, record| memo.push({:id => record.id, :label => label_for_field(record, controller)}) }
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    options.merge!(autocomplete: 'off', onfocus: "this.focused=true", onblur: "this.focused=false")
+    options[:autocomplete] = 'off'
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Multiple', id: options[:id], url: url, options: record_select_options}
     options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
