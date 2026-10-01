@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.test_files = `git ls-files test`.split("\n")
 
-  s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
   s.add_runtime_dependency(%q<rails>, [">= 4.0.0"])
   s.required_ruby_version = '>= 1.9.1'
 end
