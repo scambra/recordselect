@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RecordSelectHelper
   # If you use :params option, define this helper in your controller helpers
   # to return array with those params, so _list partial permits them
@@ -51,7 +53,7 @@ module RecordSelectHelper
     options[:controller] ||= current.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= String.new
+    options[:class] = options[:class] ? options[:class].dup : String.new
     options[:class] << ' recordselect'
     options[:clear_button] = true unless options.include? :clear_button
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
@@ -95,7 +97,7 @@ module RecordSelectHelper
     options[:controller] ||= current.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= String.new
+    options[:class] = options[:class] ? options[:class].dup : String.new
     options[:class] << ' recordselect'
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
@@ -132,7 +134,7 @@ module RecordSelectHelper
     options[:controller] ||= current.first.class.to_s.pluralize.underscore
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] ||= String.new
+    options[:class] = options[:class] ? options[:class].dup : String.new
     options[:class] << ' recordselect'
     options.delete(:name)
     js = options.include?(:js) ? options.delete(:js) : request.xhr?

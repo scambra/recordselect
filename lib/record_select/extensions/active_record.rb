@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord # :nodoc:
   class Base # :nodoc:
     unless method_defined? :to_label

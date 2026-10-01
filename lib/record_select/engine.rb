@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RecordSelect
   class Engine < Rails::Engine
     initializer 'recordselect.action_controller' do

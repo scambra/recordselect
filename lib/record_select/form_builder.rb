@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RecordSelect
   module FormBuilder
     def record_select(association, options = {})

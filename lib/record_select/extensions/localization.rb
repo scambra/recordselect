@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Provides a simple pass-through localizer for RecordSelect. If you want
 # to localize RS, you need to override this method and route it to your
 # own system.

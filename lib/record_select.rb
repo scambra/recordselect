@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RecordSelect
   def self.included(base)
     base.send :extend, ClassMethods

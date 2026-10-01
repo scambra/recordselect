@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'record_select'
 require 'record_select/extensions/localization'
 require 'record_select/extensions/active_record'
