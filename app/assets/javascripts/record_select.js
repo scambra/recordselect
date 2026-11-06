@@ -113,61 +113,6 @@
     window.RecordSelect = new Object();
     RecordSelect.document_loaded = false;
 
-    jQuery(document).ready(function() {
-      RecordSelect.document_loaded = true;
-      jQuery('[data-rs-type]').each(function() { RecordSelect.from_attributes(jQuery(this)); });
-      jQuery(document).on('click', 'div.record-select li.record', function(event) {
-        var link = jQuery(this);
-        if (link.length) {
-          RecordSelect.select_item(link);
-          return false;
-        }
-        return true;
-      });
-      jQuery(document).on('click', '.record-select-option .remove', function(event) {
-        var line = jQuery(this).parent(), value = line.find(':input:hidden').val();
-        line.parent().data('recordselect').obj.trigger('recordselect:remove', [value]);
-        line.remove();
-        return false;
-      });
-      jQuery(document).on('ajax:beforeSend', '.record-select-container', function(event, xhr) {
-        var rs = jQuery(this).data('recordselect'), cur = rs.current_xhr, found = jQuery(this).find('.found');
-        jQuery(this).find('.record, .pagination').remove();
-        found.html(found.data('searching'));
-        rs.current_xhr = xhr;
-        console.log(rs.current_xhr);
-        if (cur) cur.abort();
-      });
-      jQuery(document).on('ajax:complete', '.record-select-container', function(event, xhr, status) {
-        var rs = jQuery(this).data('recordselect');
-        if (status != 'abort' || rs.current_xhr == xhr) {
-          if (rs.is_open()) rs.show();
-          rs.current_xhr = null;
-        }
-      });
-      jQuery(document).on('click', 'input.recordselect ~ .clear-input-button', function(event) {
-        var $clear_button = jQuery(event.target), $input = $clear_button.prevAll('input');
-        if (!$input.length) return;
-        $input.val('').removeClass('selected');
-        $clear_button.removeClass('enabled');
-      });
-      jQuery(document).on('input recordselect:change', 'input.recordselect', function(event) {
-        var $clear_button = jQuery(event.target).nextAll('.clear-input-button').first();
-        if (!$clear_button.length) return;
-        if (jQuery(event.target).val()) $clear_button.addClass('enabled');
-        else $clear_button.removeClass('enabled');
-      });
-      jQuery(document).on('ajax:beforeSend', 'a.rs-mode', function() {
-        jQuery(this).closest('.record-select').find('form input[name="rs_mode"]').val(jQuery(this).data('value'));
-      });
-      jQuery(document).on('focus', 'input.recordselect', function() {
-        jQuery(this).prop('focused', true);
-      });
-      jQuery(document).on('blur', 'input.recordselect', function() {
-        jQuery(this).prop('focused', false);
-      });
-    });
-
     RecordSelect.from_attributes = function(item) {
       if (item.prop('disabled')) return;
       var rs_class = RecordSelect[item.attr('data-rs-type')];
@@ -634,6 +579,61 @@
           + '</li>';
         this.list_container.prepend(entry)
       }
+    });
+
+    jQuery(document).ready(function() {
+      RecordSelect.document_loaded = true;
+      jQuery('[data-rs-type]').each(function() { RecordSelect.from_attributes(jQuery(this)); });
+      jQuery(document).on('click', 'div.record-select li.record', function(event) {
+        var link = jQuery(this);
+        if (link.length) {
+          RecordSelect.select_item(link);
+          return false;
+        }
+        return true;
+      });
+      jQuery(document).on('click', '.record-select-option .remove', function(event) {
+        var line = jQuery(this).parent(), value = line.find(':input:hidden').val();
+        line.parent().data('recordselect').obj.trigger('recordselect:remove', [value]);
+        line.remove();
+        return false;
+      });
+      jQuery(document).on('ajax:beforeSend', '.record-select-container', function(event, xhr) {
+        var rs = jQuery(this).data('recordselect'), cur = rs.current_xhr, found = jQuery(this).find('.found');
+        jQuery(this).find('.record, .pagination').remove();
+        found.html(found.data('searching'));
+        rs.current_xhr = xhr;
+        console.log(rs.current_xhr);
+        if (cur) cur.abort();
+      });
+      jQuery(document).on('ajax:complete', '.record-select-container', function(event, xhr, status) {
+        var rs = jQuery(this).data('recordselect');
+        if (status != 'abort' || rs.current_xhr == xhr) {
+          if (rs.is_open()) rs.show();
+          rs.current_xhr = null;
+        }
+      });
+      jQuery(document).on('click', 'input.recordselect ~ .clear-input-button', function(event) {
+        var $clear_button = jQuery(event.target), $input = $clear_button.prevAll('input');
+        if (!$input.length) return;
+        $input.val('').removeClass('selected');
+        $clear_button.removeClass('enabled');
+      });
+      jQuery(document).on('input recordselect:change', 'input.recordselect', function(event) {
+        var $clear_button = jQuery(event.target).nextAll('.clear-input-button').first();
+        if (!$clear_button.length) return;
+        if (jQuery(event.target).val()) $clear_button.addClass('enabled');
+        else $clear_button.removeClass('enabled');
+      });
+      jQuery(document).on('ajax:beforeSend', 'a.rs-mode', function() {
+        jQuery(this).closest('.record-select').find('form input[name="rs_mode"]').val(jQuery(this).data('value'));
+      });
+      jQuery(document).on('focus', 'input.recordselect', function() {
+        jQuery(this).prop('focused', true);
+      });
+      jQuery(document).on('blur', 'input.recordselect', function() {
+        jQuery(this).prop('focused', false);
+      });
     });
   };
 
