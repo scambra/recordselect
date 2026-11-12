@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 module RecordSelect
+  def self.callback_registry?
+    true
+  end
+
   def self.included(base)
     base.send :extend, ClassMethods
   end

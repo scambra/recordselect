@@ -43,5 +43,22 @@ import 'record_select'
 
 Either using assets pipeline or importmap, it will be loaded when requiring or importing active_scaffold, so no need to add it to application.js, importmap.rb or manifest.js
 
+= CALLBACKS
+
+Register callbacks in a JavaScript file and pass their names to the helpers:
+
+```js
+RecordSelect.registerCallback('application.recordSelected', function(id, value, text, item) {
+  // `this` is the RecordSelect widget.
+});
+```
+
+```rb
+link_to_record_select 'Select', 'users', onselect: 'application.recordSelected'
+record_select_field 'user_id', user, rs: {onchange: 'application.recordSelected'}
+```
+
+JavaScript source strings are no longer accepted for +onselect+ or +onchange+. JavaScript callers may still pass a function directly.
+
 = DEPENDENCIES
 This depends on the excellent Paginator gem by Bruce Williams. This simple gem is available at paginator.rubyforge.org.

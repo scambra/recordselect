@@ -112,6 +112,29 @@
 
     window.RecordSelect = new Object();
     RecordSelect.document_loaded = false;
+    RecordSelect.callbacks = {};
+
+    RecordSelect.registerCallback = function(name, callback) {
+      if (typeof callback != 'function') {
+        throw new TypeError('RecordSelect callback ' + name + ' must be a function');
+      }
+      RecordSelect.callbacks[name] = callback;
+    };
+
+    RecordSelect.resolveCallback = function(value, option) {
+      if (!value || typeof value == 'function') return value;
+      if (typeof value != 'string') {
+        throw new TypeError('RecordSelect option ' + option + ' must be a function or registered callback name');
+      }
+
+      if (Object.prototype.hasOwnProperty.call(RecordSelect.callbacks, value)) {
+        var callback = RecordSelect.callbacks[value];
+        if (typeof callback == 'function') return callback;
+      }
+
+      throw new Error('RecordSelect option ' + option + ' references unknown callback ' + value +
+        '. Register it with RecordSelect.registerCallback.');
+    };
 
     RecordSelect.from_attributes = function(item) {
       if (item.prop('disabled')) return;
@@ -170,12 +193,8 @@
         this.options = options;
         this.container;
         this.min_length = options.min_length || 0;
-        if (this.options.onchange && typeof this.options.onchange != 'function') {
-          this.options.onchange = eval(this.options.onchange);
-        }
-        if (this.options.onselect && typeof this.options.onselect != 'function') {
-          this.options.onselect = eval(this.options.onselect);
-        }
+        this.options.onchange = RecordSelect.resolveCallback(this.options.onchange, 'onchange');
+        this.options.onselect = RecordSelect.resolveCallback(this.options.onselect, 'onselect');
 
         if (RecordSelect.document_loaded) {
           this.onload();
@@ -418,7 +437,7 @@
 
     /**
      * Used by link_to_record_select
-     * The options hash should contain a onselect: key, with a javascript function as value
+     * The options hash may contain an onselect key with a function or registered callback name.
      */
     RecordSelect.Dialog = RecordSelect.Abstract.extend({
       onload: function() {
@@ -428,7 +447,7 @@
       },
 
       onselect: function(id, value, text, item) {
-        if (this.options.onselect(id, value, text, item) != false) this.close();
+        if (!this.options.onselect || this.options.onselect.call(this, id, value, text, item) != false) this.close();
       },
 
       toggle: function(e) {
@@ -441,7 +460,7 @@
     /**
      * Used by record_select_field helper
      * The options hash may contain id: and label: keys, designating the current value
-     * The options hash may also include an onchange: key, where the value is a javascript function (or eval-able string) for an callback routine
+     * The options hash may also include an onchange key with a function or registered callback name.
      * and field_name: key, where value will be set as name of the input field.
      */
     RecordSelect.Single = RecordSelect.Abstract.extend({
@@ -492,7 +511,7 @@
     /**
      * Used by record_select_autocomplete helper
      * The options hash may contain label: key, designating the current value
-     * The options hash may also include an onchange: key, where the value is a javascript function (or eval-able string) for an callback routine.
+     * The options hash may also include an onchange key with a function or registered callback name.
      */
     RecordSelect.Autocomplete = RecordSelect.Abstract.extend({
       onload: function() {

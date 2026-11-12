@@ -13,14 +13,13 @@ module RecordSelectHelper
   # Adds a link on the page that toggles a RecordSelect widget from the given controller.
   #
   # *Options*
-  # +onselect+::  JavaScript code to handle selections client-side. This code has access to two variables: id, label. If the code returns false, the dialog will *not* close automatically.
+  # +onselect+::  Name of a callback registered with RecordSelect.registerCallback. If the callback returns false, the dialog will *not* close automatically.
   # +params+::    Extra URL parameters. If any parameter is a column name, the parameter will be used as a search term to filter the result set.
   # +html+::      Options for A tag
   # +rs+::        Options for RecordSelect constructor
   def link_to_record_select(name, controller, options = {})
     options[:params] ||= {}
     options[:params].merge!(:controller => controller, :action => :browse)
-    options[:onselect] = "(function(id, label) {#{options[:onselect]}})" if options[:onselect]
     options[:html] ||= {}
     options[:html][:id] ||= "rs_#{rand(9999)}"
     js = options.include?(:js) ? options[:js] : request.xhr?
@@ -30,7 +29,7 @@ module RecordSelectHelper
     record_select_options.merge! options[:rs] if options[:rs]
 
     rs_data = {type: 'Dialog', id: options[:html][:id], url: url_for(options[:params]), options: record_select_options}
-    options[:html][:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
+    options[:html][:data] = (options[:html][:data] || {}).merge(rs_data.transform_keys { |k| "rs_#{k}" }) unless js
     html = link_to(name, '#', options[:html])
     html << record_select_js(**rs_data) if js
 
