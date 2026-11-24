@@ -105,52 +105,34 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
     assert_equal [], controller(allowed_columns: []).filters
   end
 
-  def test_defaults_leave_both_column_policies_unconfigured
-    assert_nil @allowed_columns
+  def test_default_policy_requires_explicit_exclusions
+    assert_equal [], @allowed_columns
     assert_nil @excluded_columns
-    RecordSelect.excluded_columns = nil
-    assert_nil config.allowed_columns
-    assert_nil config.excluded_columns
+    RecordSelect.allowed_columns = @allowed_columns
+    RecordSelect.excluded_columns = @excluded_columns
+
+    error = assert_raise(ArgumentError) { config }
+    assert_match(/requires explicit :excluded_columns/, error.message)
+    assert_match(/unsafe.*hidden model columns/, error.message)
+    assert_match(/allowed_columns/, error.message)
+    assert_equal [], controller(excluded_columns: []).filters
   end
 
-  def test_explicit_nil_exclusions_override_global_exclusions_and_warn
+  def test_allowlist_does_not_bypass_required_exclusions
+    RecordSelect.excluded_columns = nil
+    [nil, [], [:company_id]].each do |allowed|
+      assert_raise(ArgumentError) { config(allowed_columns: allowed) }
+    end
+  end
+
+  def test_explicit_nil_exclusions_do_not_fall_back_to_the_global_policy
     RecordSelect.excluded_columns = [:password_digest]
-    instance = controller(excluded_columns: nil)
-    warnings = capture_filter_warnings { assert_equal 3, instance.filters.length }
-    assert_equal 1, warnings.length
+    assert_raise(ArgumentError) { config(excluded_columns: nil) }
   end
 
-  def test_unconfigured_filters_warn_each_time_filters_are_built
+  def test_controller_can_supply_exclusions_when_global_policy_is_unconfigured
     RecordSelect.excluded_columns = nil
-    instance = controller
-    warnings = capture_filter_warnings do
-      assert_equal 3, instance.filters.length
-      instance.filters
-    end
-    assert_equal 2, warnings.length
-    assert_match(/allowed_columns/, warnings.first)
-    assert_match(/excluded_columns/, warnings.first)
-  end
-
-  def test_unconfigured_filters_do_not_warn_for_reserved_or_unknown_parameters
-    RecordSelect.excluded_columns = nil
-    instance = controller
-    instance.params = {'action' => 'browse', 'unknown' => 'ignored'}
-    assert_empty capture_filter_warnings { assert_equal [], instance.filters }
-  end
-
-  def test_explicit_filter_policies_do_not_warn
-    RecordSelect.excluded_columns = nil
-    [{allowed_columns: []}, {allowed_columns: [:company_id]},
-     {excluded_columns: []}, {excluded_columns: [:password_digest]}].each do |options|
-      assert_empty capture_filter_warnings { controller(options).filters }
-    end
-  end
-
-  def test_global_explicit_compatibility_does_not_warn
-    RecordSelect.allowed_columns = nil
-    RecordSelect.excluded_columns = []
-    assert_empty capture_filter_warnings { assert_equal 3, controller.filters.length }
+    assert_equal [{'company_id' => '2'}], controller(allowed_columns: [:company_id], excluded_columns: []).filters
   end
 
   def test_global_settings_are_captured_when_the_controller_is_configured
@@ -180,19 +162,4 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
     assert_equal ['(name LIKE ?)', 'alice%'], instance.text_conditions
   end
 
-  private
-
-  def capture_filter_warnings
-    deprecator = RecordSelect.deprecator
-    original_behavior = deprecator.behavior
-    original_silenced = deprecator.silenced
-    warnings = []
-    deprecator.silenced = false
-    deprecator.behavior = proc { |message, *| warnings << message }
-    yield
-    warnings
-  ensure
-    deprecator.behavior = original_behavior
-    deprecator.silenced = original_silenced
-  end
 end

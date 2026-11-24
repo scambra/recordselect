@@ -68,7 +68,23 @@ Override either default for a controller:
 record_select search_on: [:name], allowed_columns: [:company_id, :active], excluded_columns: [:active]
 ```
 
-Exclusions take precedence over allowed columns. Symbols and strings are accepted. In 4.1.1, both settings default to +nil+, preserving filtering on all model columns with a deprecation warning when a column filter is used. The warning is emitted on every request that applies automatic URL column filters. In 4.2.0, +allowed_columns+ will default to +[]+, disabling automatic URL column filtering. An empty allowed list disables all automatic URL column filters. Controller options replace the corresponding global list; explicit +allowed_columns: nil+ allows all model columns and +excluded_columns: []+ clears global exclusions for that controller. To explicitly retain unrestricted filtering without a warning, set +allowed_columns: nil, excluded_columns: []+ (or the corresponding global settings). These settings do not restrict the trusted SQL expressions in +search_on+ or custom controller conditions.
+Exclusions take precedence over allowed columns. Symbols and strings are accepted. +allowed_columns+ defaults to +[]+, disabling automatic URL column filters. +excluded_columns+ defaults to +nil+ and must be explicitly configured globally or per controller; otherwise +record_select+ raises +ArgumentError+ when the controller is loaded. With eager loading this normally happens at boot; with lazy loading it may happen on the first request to that controller.
+
+To acknowledge disabled URL column filtering globally:
+
+```rb
+RecordSelect.excluded_columns = []
+```
+
+To enable only specific filters for a controller:
+
+```rb
+record_select search_on: [:name], allowed_columns: [:company_id], excluded_columns: []
+```
+
+To explicitly restore unrestricted legacy filtering, use +allowed_columns: nil, excluded_columns: []+ (or the corresponding global settings). This permits filtering on hidden model columns and restores the reported disclosure risk. Prefer a narrow allowlist.
+
+Controller options replace the corresponding global list. These settings do not restrict the trusted SQL expressions in +search_on+ or custom controller conditions.
 
 = CALLBACKS
 

@@ -6,7 +6,7 @@ module RecordSelect
   class << self
     attr_accessor :allowed_columns, :excluded_columns
   end
-  self.allowed_columns = nil
+  self.allowed_columns = []
   self.excluded_columns = nil
 
   def self.deprecator

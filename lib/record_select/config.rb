@@ -12,8 +12,14 @@ module RecordSelect
       @search_on = [options[:search_on]].flatten
       allowed_columns = options.fetch(:allowed_columns) { RecordSelect.allowed_columns }
       excluded_columns = options.fetch(:excluded_columns) { RecordSelect.excluded_columns }
+      if excluded_columns.nil?
+        raise ArgumentError, 'record_select requires explicit :excluded_columns (use [] for no exclusions). ' \
+                             'URL column filters are disabled by default; set :allowed_columns to the required columns. ' \
+                             'To explicitly restore unrestricted legacy filtering, use allowed_columns: nil, excluded_columns: []. ' \
+                             'This is unsafe: filtering on hidden model columns can disclose sensitive values. Prefer an explicit allowlist.'
+      end
       @allowed_columns = Array(allowed_columns).map(&:to_s) unless allowed_columns.nil?
-      @excluded_columns = Array(excluded_columns).map(&:to_s) unless excluded_columns.nil?
+      @excluded_columns = Array(excluded_columns).map(&:to_s)
       @order_by = options[:order_by]
       @full_text_search = options[:full_text_search]
       @label = options[:label]
@@ -50,21 +56,10 @@ module RecordSelect
     # NOTE: this does *NO* default transforms (such as LOWER()), that's left entirely up to you.
     attr_reader :search_on
 
-    def warn_unconfigured_column_filters
-      return unless allowed_columns.nil? && excluded_columns.nil?
-
-      RecordSelect.deprecator.warn(
-        "Automatic URL filtering on all model columns is deprecated and can expose hidden values. " \
-        "Configure allowed_columns to list permitted filter columns, or [] to disable URL column filtering. " \
-        "Set allowed_columns: nil and excluded_columns: [] to explicitly retain unrestricted filtering " \
-        "without this warning. Automatic URL column filtering will be disabled by default in RecordSelect 4.2.0."
-      )
-    end
-
     def column_allowed?(name)
       name = name.to_s
       allowed = allowed_columns
-      (allowed.nil? || allowed.include?(name)) && (excluded_columns.nil? || !excluded_columns.include?(name))
+      (allowed.nil? || allowed.include?(name)) && !excluded_columns.include?(name)
     end
 
     def order_by

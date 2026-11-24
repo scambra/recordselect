@@ -76,7 +76,6 @@ module RecordSelect
 
         conditions << record_select_condition_for_column(column, value)
       end
-      record_select_config.warn_unconfigured_column_filters unless conditions.empty?
       conditions
     end
 
