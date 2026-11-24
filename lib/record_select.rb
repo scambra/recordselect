@@ -7,7 +7,7 @@ module RecordSelect
     attr_accessor :allowed_columns, :excluded_columns
   end
   self.allowed_columns = []
-  self.excluded_columns = nil
+  self.excluded_columns = []
 
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('4.2.0', 'RecordSelect')

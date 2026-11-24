@@ -105,34 +105,30 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
     assert_equal [], controller(allowed_columns: []).filters
   end
 
-  def test_default_policy_requires_explicit_exclusions
+  def test_default_policy_disables_parameter_filters_without_explicit_configuration
     assert_equal [], @allowed_columns
-    assert_nil @excluded_columns
+    assert_equal [], @excluded_columns
     RecordSelect.allowed_columns = @allowed_columns
     RecordSelect.excluded_columns = @excluded_columns
 
-    error = assert_raise(ArgumentError) { config }
-    assert_match(/requires explicit :excluded_columns/, error.message)
-    assert_match(/unsafe.*hidden model columns/, error.message)
-    assert_match(/allowed_columns/, error.message)
-    assert_equal [], controller(excluded_columns: []).filters
+    assert_equal [], controller.filters
   end
 
-  def test_allowlist_does_not_bypass_required_exclusions
+  def test_nil_global_exclusions_are_normalized_without_enabling_filters
+    RecordSelect.allowed_columns = []
     RecordSelect.excluded_columns = nil
-    [nil, [], [:company_id]].each do |allowed|
-      assert_raise(ArgumentError) { config(allowed_columns: allowed) }
-    end
+
+    assert_equal [], config.excluded_columns
+    assert_equal [], controller.filters
+    assert_equal [{'company_id' => '2'}], controller(allowed_columns: [:company_id]).filters
   end
 
-  def test_explicit_nil_exclusions_do_not_fall_back_to_the_global_policy
-    RecordSelect.excluded_columns = [:password_digest]
-    assert_raise(ArgumentError) { config(excluded_columns: nil) }
-  end
+  def test_explicit_nil_exclusions_clear_global_exclusions
+    RecordSelect.excluded_columns = [:company_id]
+    instance = controller(allowed_columns: [:company_id], excluded_columns: nil)
 
-  def test_controller_can_supply_exclusions_when_global_policy_is_unconfigured
-    RecordSelect.excluded_columns = nil
-    assert_equal [{'company_id' => '2'}], controller(allowed_columns: [:company_id], excluded_columns: []).filters
+    assert_equal [], instance.record_select_config.excluded_columns
+    assert_equal [{'company_id' => '2'}], instance.filters
   end
 
   def test_global_settings_are_captured_when_the_controller_is_configured

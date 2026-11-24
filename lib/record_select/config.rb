@@ -12,12 +12,6 @@ module RecordSelect
       @search_on = [options[:search_on]].flatten
       allowed_columns = options.fetch(:allowed_columns) { RecordSelect.allowed_columns }
       excluded_columns = options.fetch(:excluded_columns) { RecordSelect.excluded_columns }
-      if excluded_columns.nil?
-        raise ArgumentError, 'record_select requires explicit :excluded_columns (use [] for no exclusions). ' \
-                             'URL column filters are disabled by default; set :allowed_columns to the required columns. ' \
-                             'To explicitly restore unrestricted legacy filtering, use allowed_columns: nil, excluded_columns: []. ' \
-                             'This is unsafe: filtering on hidden model columns can disclose sensitive values. Prefer an explicit allowlist.'
-      end
       @allowed_columns = Array(allowed_columns).map(&:to_s) unless allowed_columns.nil?
       @excluded_columns = Array(excluded_columns).map(&:to_s)
       @order_by = options[:order_by]

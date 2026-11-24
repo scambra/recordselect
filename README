@@ -68,13 +68,7 @@ Override either default for a controller:
 record_select search_on: [:name], allowed_columns: [:company_id, :active], excluded_columns: [:active]
 ```
 
-Exclusions take precedence over allowed columns. Symbols and strings are accepted. +allowed_columns+ defaults to +[]+, disabling automatic URL column filters. +excluded_columns+ defaults to +nil+ and must be explicitly configured globally or per controller; otherwise +record_select+ raises +ArgumentError+ when the controller is loaded. With eager loading this normally happens at boot; with lazy loading it may happen on the first request to that controller.
-
-To acknowledge disabled URL column filtering globally:
-
-```rb
-RecordSelect.excluded_columns = []
-```
+Exclusions take precedence over allowed columns. Symbols and strings are accepted. Both +allowed_columns+ and +excluded_columns+ default to +[]+, disabling automatic URL column filters without requiring explicit configuration. An explicit +excluded_columns: nil+ is treated as +[]+ and clears any global exclusions for that controller; it does not enable filtering by itself.
 
 To enable only specific filters for a controller:
 
