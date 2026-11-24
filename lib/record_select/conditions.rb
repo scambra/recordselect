@@ -54,6 +54,8 @@ module RecordSelect
     end
     
     def build_record_select_conditions(tokens, operator, search_pattern)
+      return if record_select_config.search_on.empty?
+
       where_clauses = record_select_config.search_on.collect { |sql| "#{sql} #{operator} ?" }
       phrase = "(#{where_clauses.join(' OR ')})"
       sql = ([phrase] * tokens.length).join(' AND ')
@@ -68,9 +70,13 @@ module RecordSelect
       ignored_columns = %w[controller action page search update]
       params.each do |field, value|
         next if field.in? ignored_columns
+        next unless record_select_config.column_allowed?(field)
         column = record_select_config.model.columns_hash[field]
-        conditions << record_select_condition_for_column(column, value) if column
+        next unless column
+
+        conditions << record_select_condition_for_column(column, value)
       end
+      record_select_config.warn_unconfigured_column_filters unless conditions.empty?
       conditions
     end
 

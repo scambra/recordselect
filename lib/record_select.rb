@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
+require 'active_support/deprecation'
+
 module RecordSelect
+  class << self
+    attr_accessor :allowed_columns, :excluded_columns
+  end
+  self.allowed_columns = nil
+  self.excluded_columns = nil
+
+  def self.deprecator
+    @deprecator ||= ActiveSupport::Deprecation.new('4.2.0', 'RecordSelect')
+  end
+
   def self.callback_registry?
     true
   end
@@ -17,7 +29,9 @@ module RecordSelect
     # +per_page+::  records to show per page when browsing
     # +notify+::    a method name to invoke when a record has been selected.
     # +order_by+::  a SQL string to order the search results
-    # +search_on+:: an array of searchable fields
+    # +search_on+:: required searchable field or array of fields; [] disables the built-in text search
+    # +allowed_columns+:: URL parameter filter columns; nil allows all model columns. Overrides RecordSelect.allowed_columns.
+    # +excluded_columns+:: URL parameter filter columns to ignore, even if allowed. Overrides RecordSelect.excluded_columns.
     # +full_text_search+::  a boolean for whether to use a %?% search pattern or not. default is false.
     # +label+::     a proc that accepts a record as argument and returns an option label. default is to call record.to_label instead.
     # +include+::   as for ActiveRecord::Base#find. can help with search conditions or just help optimize rendering the results.

@@ -4,10 +4,16 @@ module RecordSelect
   # a write-once configuration object
   class Config
     def initialize(klass, options = {})
+      raise ArgumentError, 'record_select requires :search_on (use [] for custom or deferred searches)' if options[:search_on].nil?
+
       @klass = klass
       @notify = block_given? ? proc : options[:notify]
       @per_page = options[:per_page]
-      @search_on = [options[:search_on]].flatten unless options[:search_on].nil?
+      @search_on = [options[:search_on]].flatten
+      allowed_columns = options.fetch(:allowed_columns) { RecordSelect.allowed_columns }
+      excluded_columns = options.fetch(:excluded_columns) { RecordSelect.excluded_columns }
+      @allowed_columns = Array(allowed_columns).map(&:to_s) unless allowed_columns.nil?
+      @excluded_columns = Array(excluded_columns).map(&:to_s) unless excluded_columns.nil?
       @order_by = options[:order_by]
       @full_text_search = options[:full_text_search]
       @label = options[:label]
@@ -18,7 +24,7 @@ module RecordSelect
       @toggle_search_mode = options[:toggle_search_mode]
     end
 
-    attr_reader :include, :joins, :left_joins
+    attr_reader :include, :joins, :left_joins, :allowed_columns, :excluded_columns
 
     def pagination?
       @pagination
@@ -42,8 +48,23 @@ module RecordSelect
 
     # A collection of fields to search. This is essentially raw SQL, so you could search on "CONCAT(first_name, ' ', last_name)" if you wanted to.
     # NOTE: this does *NO* default transforms (such as LOWER()), that's left entirely up to you.
-    def search_on
-      @search_on ||= self.model.columns.collect{|c| c.name if [:text, :string].include? c.type}.compact
+    attr_reader :search_on
+
+    def warn_unconfigured_column_filters
+      return unless allowed_columns.nil? && excluded_columns.nil?
+
+      RecordSelect.deprecator.warn(
+        "Automatic URL filtering on all model columns is deprecated and can expose hidden values. " \
+        "Configure allowed_columns to list permitted filter columns, or [] to disable URL column filtering. " \
+        "Set allowed_columns: nil and excluded_columns: [] to explicitly retain unrestricted filtering " \
+        "without this warning. Automatic URL column filtering will be disabled by default in RecordSelect 4.2.0."
+      )
+    end
+
+    def column_allowed?(name)
+      name = name.to_s
+      allowed = allowed_columns
+      (allowed.nil? || allowed.include?(name)) && (excluded_columns.nil? || !excluded_columns.include?(name))
     end
 
     def order_by

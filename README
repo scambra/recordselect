@@ -43,6 +43,33 @@ import 'record_select'
 
 Either using assets pipeline or importmap, it will be loaded when requiring or importing active_scaffold, so no need to add it to application.js, importmap.rb or manifest.js
 
+= CONTROLLER CONFIGURATION
+
+Every controller must explicitly supply +search_on+. There is no automatic search across model columns:
+
+```rb
+record_select search_on: [:name, :email]
+```
+
+Use +search_on: []+ for a custom search implementation or when assigning search fields later. With an empty array, the built-in text search adds no conditions.
+
+URL parameters matching model columns can also filter the records. Limit these separately from text search using global defaults, for example in an initializer:
+
+```rb
+RecordSelect.allowed_columns = [:id, :company_id]
+RecordSelect.excluded_columns = [:password_digest, :reset_password_token]
+```
+
+Global defaults are captured and normalized when each controller calls +record_select+. Set them before controller configuration; later global changes do not affect existing configurations.
+
+Override either default for a controller:
+
+```rb
+record_select search_on: [:name], allowed_columns: [:company_id, :active], excluded_columns: [:active]
+```
+
+Exclusions take precedence over allowed columns. Symbols and strings are accepted. In 4.1.1, both settings default to +nil+, preserving filtering on all model columns with a deprecation warning when a column filter is used. The warning is emitted on every request that applies automatic URL column filters. In 4.2.0, +allowed_columns+ will default to +[]+, disabling automatic URL column filtering. An empty allowed list disables all automatic URL column filters. Controller options replace the corresponding global list; explicit +allowed_columns: nil+ allows all model columns and +excluded_columns: []+ clears global exclusions for that controller. To explicitly retain unrestricted filtering without a warning, set +allowed_columns: nil, excluded_columns: []+ (or the corresponding global settings). These settings do not restrict the trusted SQL expressions in +search_on+ or custom controller conditions.
+
 = CALLBACKS
 
 Register callbacks in a JavaScript file and pass their names to the helpers:
