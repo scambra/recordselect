@@ -4,7 +4,10 @@ module RecordSelect
   # a write-once configuration object
   class Config
     def initialize(klass, options = {})
-      raise ArgumentError, 'record_select requires :search_on (use [] for custom or deferred searches)' if options[:search_on].nil?
+      if options[:search_on].nil?
+        raise ArgumentError,
+              'record_select requires :search_on (use [] for custom or deferred searches)'
+      end
 
       @klass = klass
       @notify = block_given? ? proc : options[:notify]
@@ -46,7 +49,8 @@ module RecordSelect
       @notify
     end
 
-    # A collection of fields to search. This is essentially raw SQL, so you could search on "CONCAT(first_name, ' ', last_name)" if you wanted to.
+    # A collection of fields to search. This is essentially raw SQL, so you could search on "CONCAT(first_name, ' ',
+    # last_name)" if you wanted to.
     # NOTE: this does *NO* default transforms (such as LOWER()), that's left entirely up to you.
     attr_reader :search_on
 
@@ -86,7 +90,7 @@ module RecordSelect
     #   </div>
     #
     def label
-      @label ||= proc {|r| r.to_label}
+      @label ||= proc { |r| r.to_label }
     end
 
     protected

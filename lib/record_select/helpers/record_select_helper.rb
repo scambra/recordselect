@@ -13,8 +13,10 @@ module RecordSelectHelper
   # Adds a link on the page that toggles a RecordSelect widget from the given controller.
   #
   # *Options*
-  # +onselect+::  Name of a callback registered with RecordSelect.registerCallback. If the callback returns false, the dialog will *not* close automatically.
-  # +params+::    Extra URL parameters. If any parameter is a column name, the parameter will be used as a search term to filter the result set.
+  # +onselect+::  Name of a callback registered with RecordSelect.registerCallback. If the callback returns false, the
+  #   dialog will *not* close automatically.
+  # +params+::    Extra URL parameters. If any parameter is a column name, the parameter will be used as a search term
+  #   to filter the result set.
   # +html+::      Options for A tag
   # +rs+::        Options for RecordSelect constructor
   def link_to_record_select(name, controller, options = {})
@@ -40,10 +42,13 @@ module RecordSelectHelper
   #
   # *Arguments*
   # +name+:: the input name that will be used to submit the selected record's id.
-  # +current+:: the currently selected object. provide a new record if there're none currently selected and you have not passed the optional :controller argument.
+  # +current+:: the currently selected object. provide a new record if there're none currently selected and you have not
+  #   passed the optional :controller argument.
   #
   # *Options*
-  # +controller+::  The controller configured to provide the result set. Optional if you have standard resource controllers (e.g. UsersController for the User model), in which case the controller will be inferred from the class of +current+ (the second argument)
+  # +controller+::  The controller configured to provide the result set. Optional if you have standard resource
+  #   controllers (e.g. UsersController for the User model), in which case the controller will be inferred from the
+  #   class of +current+ (the second argument)
   # +params+::      A hash of extra URL parameters
   # +id+::          The id to use for the input. Defaults based on the input's name.
   # +field_name+::  The name to use for the text input. Defaults to '', so field is not submitted.
@@ -75,7 +80,10 @@ module RecordSelectHelper
     rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
     options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
     html = text_field_tag(name, nil, options)
-    html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input', title: 'Clear input') if clear_button
+    if clear_button
+      html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input',
+                              title: 'Clear input')
+    end
     html << record_select_js(**rs_data) if js
 
     html
@@ -85,10 +93,13 @@ module RecordSelectHelper
   #
   # *Arguments*
   # +name+:: the input name that will be used to submit the selected value.
-  # +current+:: the current object. provide a new record if there're none currently selected and you have not passed the optional :controller argument.
+  # +current+:: the current object. provide a new record if there're none currently selected and you have not passed the
+  #   optional :controller argument.
   #
   # *Options*
-  # +controller+::  The controller configured to provide the result set. Optional if you have standard resource controllers (e.g. UsersController for the User model), in which case the controller will be inferred from the class of +current+ (the second argument)
+  # +controller+::  The controller configured to provide the result set. Optional if you have standard resource
+  #   controllers (e.g. UsersController for the User model), in which case the controller will be inferred from the
+  #   class of +current+ (the second argument)
   # +params+::      A hash of extra URL parameters
   # +id+::          The id to use for the input. Defaults based on the input's name.
   # +rs+::          Options for RecordSelect constructor
@@ -121,7 +132,8 @@ module RecordSelectHelper
   # Adds a RecordSelect-based form field for multiple selections. The values submit using a list of hidden inputs.
   #
   # *Arguments*
-  # +name+:: the input name that will be used to submit the selected records' ids. empty brackets will be appended to the name.
+  # +name+:: the input name that will be used to submit the selected records' ids. empty brackets will be appended to
+  #   the name.
   # +current+:: pass a collection of existing associated records
   #
   # *Options*
@@ -141,7 +153,9 @@ module RecordSelectHelper
     controller = assert_controller_responds(options.delete(:controller))
     params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path)}
-    record_select_options[:current] = current.inject([]) { |memo, record| memo.push({:id => record.id, :label => label_for_field(record, controller)}) }
+    record_select_options[:current] = current.inject([]) do |memo, record|
+      memo.push({:id => record.id, :label => label_for_field(record, controller)})
+    end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
     options[:autocomplete] = 'off'
@@ -157,14 +171,14 @@ module RecordSelectHelper
   end
 
   # A helper to render RecordSelect partials
-  def render_record_select(options = {}) #:nodoc:
+  def render_record_select(options = {}) # :nodoc:
     controller.send(:render_record_select, options) do |options|
       render options
     end
   end
 
   # Provides view access to the RecordSelect configuration
-  def record_select_config #:nodoc:
+  def record_select_config # :nodoc:
     controller.send :record_select_config
   end
 
@@ -173,12 +187,12 @@ module RecordSelectHelper
   end
 
   # The id of the RecordSelect widget for the given controller.
-  def record_select_id(controller = nil) #:nodoc:
+  def record_select_id(controller = nil) # :nodoc:
     controller ||= params[:controller]
     "record-select-#{controller.gsub('/', '_')}"
   end
 
-  def record_select_search_id(controller = nil) #:nodoc:
+  def record_select_search_id(controller = nil) # :nodoc:
     "#{record_select_id(controller)}-search"
   end
 
@@ -203,16 +217,17 @@ module RecordSelectHelper
   # if given a controller, searches for a partial in its views path
   def label_for_field(record, controller = self.controller)
     renderer = controller.record_select_config.label
-    description = case renderer
-    when Symbol, String
-      # find the <label> element and grab its innerHTML
-      render_record_from_config(record, File.join(controller.controller_path, renderer.to_s))
+    description =
+      case renderer
+      when Symbol, String
+        # find the <label> element and grab its innerHTML
+        render_record_from_config(record, File.join(controller.controller_path, renderer.to_s))
 
-    when Proc
-      # just return the string
-      render_record_from_config(record, renderer)
-    end
-    description.match(/<label[^>]*>(.*)<\/label>/){ |match| match[1] } || description if description
+      when Proc
+        # just return the string
+        render_record_from_config(record, renderer)
+      end
+    description.match(/<label[^>]*>(.*)<\/label>/) { |match| match[1] } || description if description
   end
 
   def assert_controller_responds(controller_name)
@@ -221,6 +236,7 @@ module RecordSelectHelper
     unless controller.uses_record_select?
       raise "#{controller_name} has not been configured to use RecordSelect."
     end
+
     controller
   end
 end

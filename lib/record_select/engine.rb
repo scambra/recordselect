@@ -11,7 +11,8 @@ module RecordSelect
     initializer 'record_select.action_view' do
       ActiveSupport.on_load :action_view do
         include RecordSelectHelper
-        ActionView::Helpers::FormBuilder.send(:include, RecordSelect::FormBuilder)
+
+        ActionView::Helpers::FormBuilder.include RecordSelect::FormBuilder
       end
     end
 

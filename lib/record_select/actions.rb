@@ -16,7 +16,7 @@ module RecordSelect
       @page = pager.page(params[:page] || 1)
 
       respond_to do |wants|
-        wants.html { render_record_select :partial => 'browse'}
+        wants.html { render_record_select :partial => 'browse' }
         wants.js {
           if params[:update]
             render_record_select :template => 'browse'
@@ -24,9 +24,9 @@ module RecordSelect
             render_record_select :partial => 'browse'
           end
         }
-        wants.yaml {}
-        wants.xml {}
-        wants.json {}
+        wants.any(:yaml, :xml, :json) do
+          # Use Rails default template rendering for these formats.
+        end
       end
     end
 
@@ -45,11 +45,11 @@ module RecordSelect
 
     protected
 
-    def record_select_config #:nodoc:
+    def record_select_config # :nodoc:
       self.class.record_select_config
     end
 
-    def render_record_select(options = {}) #:nodoc:
+    def render_record_select(options = {}) # :nodoc:
       [:template, :partial].each do |template_name|
         if options[template_name] then
           options[template_name] = File.join(record_select_views_path, options[template_name])

@@ -9,6 +9,7 @@ require 'record_select/conditions'
 class RecordSelectConfigurationTest < ActiveSupport::TestCase
   class FilterController
     include RecordSelect::Conditions
+
     attr_accessor :params, :record_select_config
 
     def filters
@@ -154,5 +155,4 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
     instance = controller(allowed_columns: [], excluded_columns: [:name])
     assert_equal ['(name LIKE ?)', 'alice%'], instance.text_conditions
   end
-
 end

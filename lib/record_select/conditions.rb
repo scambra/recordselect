@@ -3,6 +3,7 @@
 module RecordSelect
   module Conditions
     protected
+
     # returns the combination of all conditions.
     # conditions come from:
     # * current search (params[:search])
@@ -29,7 +30,7 @@ module RecordSelect
     end
 
     # define special list of selected fields,
-    # mainly to define extra fields that can be used for 
+    # mainly to define extra fields that can be used for
     # specialized sorting.
     def record_select_select
     end
@@ -50,17 +51,19 @@ module RecordSelect
     end
 
     def full_text_search?
-      record_select_config.full_text_search? && params[:rs_mode].blank? || params[:rs_mode] == 'contains'
+      (record_select_config.full_text_search? && params[:rs_mode].blank?) || params[:rs_mode] == 'contains'
     end
-    
+
     def build_record_select_conditions(tokens, operator, search_pattern)
       return if record_select_config.search_on.empty?
 
       where_clauses = record_select_config.search_on.collect { |sql| "#{sql} #{operator} ?" }
       phrase = "(#{where_clauses.join(' OR ')})"
       sql = ([phrase] * tokens.length).join(' AND ')
-      
-      tokens = tokens.collect { |token| [search_pattern.sub('?', token)] * record_select_config.search_on.length }.flatten
+
+      tokens = tokens.collect do |token|
+        [search_pattern.sub('?', token)] * record_select_config.search_on.length
+      end.flatten
       [sql, *tokens]
     end
 
@@ -71,6 +74,7 @@ module RecordSelect
       params.each do |field, value|
         next if field.in? ignored_columns
         next unless record_select_config.column_allowed?(field)
+
         column = record_select_config.model.columns_hash[field]
         next unless column
 

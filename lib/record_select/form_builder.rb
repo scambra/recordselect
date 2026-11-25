@@ -21,7 +21,7 @@ module RecordSelect
     def form_name_for_association(reflection)
       key_name = (reflection.options[:foreign_key] || reflection.association_foreign_key)
       key_name += "s" unless [:has_one, :belongs_to].include? reflection.macro
-      form_name = "#{@object_name}[#{key_name}]"
+      "#{@object_name}[#{key_name}]"
     end
   end
 end
