@@ -15,7 +15,11 @@ group :development do
 end
 
 group :test do
+  gem 'capybara'
+  gem 'jquery-rails'
   gem 'minitest', '~> 5.0'
+  gem 'puma'
+  gem 'selenium-webdriver', '< 4.45'
   gem 'simplecov', '~> 1.3', require: false
 end
 

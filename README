@@ -99,3 +99,25 @@ JavaScript source strings are no longer accepted for +onselect+ or +onchange+. J
 
 = DEPENDENCIES
 This depends on the excellent Paginator gem by Bruce Williams. This simple gem is available at paginator.rubyforge.org.
+
+= RUNNING TESTS
+
+Run the Ruby and rendered-view tests with:
+
+    bundle exec rake test
+
+Run the JavaScript behavior tests with:
+
+    bundle exec rake test:javascript
+
+The JavaScript suite uses Capybara, Selenium, and headless Chrome or Chromium.
+It serves the actual RecordSelect, jQuery, and jquery-ujs assets from a small
+local Rack application, including real AJAX search and pagination responses.
+No host application or database is required. A compatible ChromeDriver must
+be on PATH, or Selenium Manager must be able to obtain one. Set CHROME_BIN to
+use a specific browser executable, for example:
+
+    CHROME_BIN=/usr/bin/chromium bundle exec rake test:javascript
+
+Both suites run in CI. COVERAGE=true measures Ruby and ERB coverage; it does
+not measure JavaScript coverage.

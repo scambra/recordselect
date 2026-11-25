@@ -30,6 +30,8 @@ jobs:
         env:
           COVERAGE: 'true'
         run: bundle exec rake test
+      - name: Run JavaScript browser tests
+        run: bundle exec rake test:javascript
       - uses: qltysh/qlty-action/coverage@v2
         with:
           oidc: true

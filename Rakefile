@@ -14,8 +14,17 @@ Bundler::GemHelper.install_tasks
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/{test_*,*_test}.rb'
+  test.test_files = FileList['test/**/{test_*,*_test}.rb'].exclude('test/javascript/**/*')
   test.verbose = true
+end
+
+namespace :test do
+  desc 'Run RecordSelect JavaScript in headless Chrome'
+  Rake::TestTask.new(:javascript) do |test|
+    test.libs << 'lib' << 'test'
+    test.pattern = 'test/javascript/**/*_test.rb'
+    test.verbose = true
+  end
 end
 
 require 'rdoc/task'
