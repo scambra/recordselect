@@ -6,7 +6,12 @@ require 'record_select'
 require 'record_select/config'
 require 'record_select/conditions'
 
-class RecordSelectConfigurationTest < ActiveSupport::TestCase
+class RecordSelectConfigTest < ActiveSupport::TestCase
+  class Model
+    def self.table_name = 'members'
+    def self.primary_key = 'uuid'
+  end
+
   class FilterController
     include RecordSelect::Conditions
 
@@ -38,7 +43,7 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
   end
 
   def config(options = {})
-    RecordSelect::Config.new('user', {search_on: [:name]}.merge(options))
+    RecordSelect::Config.new(Model, {search_on: [:name]}.merge(options))
   end
 
   def controller(options = {})
@@ -154,5 +159,60 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
   def test_parameter_restrictions_do_not_limit_text_search
     instance = controller(allowed_columns: [], excluded_columns: [:name])
     assert_equal ['(name LIKE ?)', 'alice%'], instance.text_conditions
+  end
+
+  def test_model_resolution_and_default_order_use_the_models_primary_key
+    instance = config
+    assert_same Model, instance.model
+    assert_same instance.model, instance.model
+    assert_equal 'members.uuid ASC', instance.order_by
+  end
+
+  def test_default_pagination_and_search_settings
+    instance = config
+    assert_equal 10, instance.per_page
+    assert instance.pagination?
+    assert_not instance.full_text_search?
+    assert_not instance.toggle_search_mode?
+    assert_nil instance.notify
+    assert_equal [:name], instance.search_on
+  end
+
+  def test_explicit_settings_and_associations_are_preserved
+    instance = config(per_page: 25, pagination: false, full_text_search: true, toggle_search_mode: true,
+                      order_by: 'name DESC', notify: :selected, include: :company, joins: :roles, left_joins: :team)
+    assert_equal 25, instance.per_page
+    assert_not instance.pagination?
+    assert instance.full_text_search?
+    assert instance.toggle_search_mode?
+    assert_equal 'name DESC', instance.order_by
+    assert_equal :selected, instance.notify
+    assert_equal :company, instance.include
+    assert_equal :roles, instance.joins
+    assert_equal :team, instance.left_joins
+  end
+
+  def test_ordering_can_be_disabled
+    assert_nil config(order_by: false).order_by
+  end
+
+  def test_default_label_and_custom_renderers
+    record = Struct.new(:to_label).new('Alice')
+    assert_equal 'Alice', config.label.call(record)
+    renderer = proc { |item| "Member #{item.to_label}" }
+    assert_same renderer, config(label: renderer).label
+    assert_equal :member, config(label: :member).label
+    assert_equal 'member', config(label: 'member').label
+  end
+
+  def test_nested_search_fields_are_flattened
+    assert_equal %i[name email], config(search_on: [:name, [:email]]).search_on
+  end
+
+  def test_column_policy_accepts_symbols_and_exclusions_win
+    instance = config(allowed_columns: :name, excluded_columns: 'name')
+    assert_not instance.column_allowed?(:name)
+    assert_not instance.column_allowed?('email')
+    assert config(allowed_columns: nil).column_allowed?(:email)
   end
 end
