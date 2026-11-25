@@ -55,10 +55,7 @@ module RecordSelectHelper
   # +rs+::          Options for RecordSelect constructor
   def record_select_field(name, current, options = {})
     options[:controller] ||= current.class.to_s.pluralize.underscore
-    options[:params] ||= {}
-    options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] = options[:class] ? options[:class].dup : String.new
-    options[:class] << ' recordselect'
+    prepare_record_select_field_options(name, options)
     options[:clear_button] = true unless options.include? :clear_button
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
@@ -74,19 +71,11 @@ module RecordSelectHelper
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    clear_button = options.delete(:clear_button)
     options[:autocomplete] = 'off'
     url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
     rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
     options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
-    html = text_field_tag(name, nil, options)
-    if clear_button
-      html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input',
-                              title: 'Clear input')
-    end
-    html << record_select_js(**rs_data) if js
-
-    html
+    render_record_select_single_field(name, options, rs_data, clear_button_class: clear_button_class, javascript: js)
   end
 
   # Adds a RecordSelect-based form field. The field is autocompleted.
@@ -105,10 +94,7 @@ module RecordSelectHelper
   # +rs+::          Options for RecordSelect constructor
   def record_select_autocomplete(name, current, options = {})
     options[:controller] ||= current.class.to_s.pluralize.underscore
-    options[:params] ||= {}
-    options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] = options[:class] ? options[:class].dup : String.new
-    options[:class] << ' recordselect'
+    prepare_record_select_field_options(name, options)
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
@@ -143,10 +129,7 @@ module RecordSelectHelper
   # +rs+::          Options for RecordSelect constructor
   def record_multi_select_field(name, current, options = {})
     options[:controller] ||= current.first.class.to_s.pluralize.underscore
-    options[:params] ||= {}
-    options[:id] ||= name.gsub(/[\[\]]/, '_')
-    options[:class] = options[:class] ? options[:class].dup : String.new
-    options[:class] << ' recordselect'
+    prepare_record_select_field_options(name, options)
     options.delete(:name)
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
@@ -189,7 +172,7 @@ module RecordSelectHelper
   # The id of the RecordSelect widget for the given controller.
   def record_select_id(controller = nil) # :nodoc:
     controller ||= params[:controller]
-    "record-select-#{controller.gsub('/', '_')}"
+    "record-select-#{controller.tr('/', '_')}"
   end
 
   def record_select_search_id(controller = nil) # :nodoc:
@@ -197,6 +180,25 @@ module RecordSelectHelper
   end
 
   private
+
+  def prepare_record_select_field_options(name, options)
+    options[:params] ||= {}
+    options[:id] ||= name.gsub(/[\[\]]/, '_')
+    options[:class] = options[:class] ? options[:class].dup : +''
+    options[:class] << ' recordselect'
+  end
+
+  def render_record_select_single_field(name, options, rs_data, clear_button_class:, javascript:)
+    clear_button = options.delete(:clear_button)
+    html = text_field_tag(name, nil, options)
+    if clear_button
+      html << button_tag('x', type: :button, class: clear_button_class, aria_label: 'Clear input',
+                              title: 'Clear input')
+    end
+    html << record_select_js(**rs_data) if javascript
+
+    html
+  end
 
   # uses renderer (defaults to record_select_config.label) to determine how the given record renders.
   def render_record_from_config(record, renderer = record_select_config.label)
