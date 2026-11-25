@@ -16,14 +16,14 @@ module RecordSelect
       @page = pager.page(params[:page] || 1)
 
       respond_to do |wants|
-        wants.html { render_record_select :partial => 'browse' }
-        wants.js {
+        wants.html { render_record_select partial: 'browse' }
+        wants.js do
           if params[:update]
-            render_record_select :template => 'browse'
+            render_record_select template: 'browse'
           else
-            render_record_select :partial => 'browse'
+            render_record_select partial: 'browse'
           end
-        }
+        end
         wants.any(:yaml, :xml, :json) do
           # Use Rails default template rendering for these formats.
         end
@@ -40,7 +40,7 @@ module RecordSelect
       elsif record_select_config.notify
         send(record_select_config.notify, record)
       end
-      render :nothing => true
+      render nothing: true
     end
 
     protected
@@ -50,12 +50,12 @@ module RecordSelect
     end
 
     def render_record_select(options = {}) # :nodoc:
-      [:template, :partial].each do |template_name|
-        if options[template_name] then
+      %i[template partial].each do |template_name|
+        if options[template_name]
           options[template_name] = File.join(record_select_views_path, options[template_name])
         end
       end
-      if block_given? then
+      if block_given?
         yield options
       else
         render options
@@ -74,7 +74,7 @@ module RecordSelect
     end
 
     def record_select_views_path
-      "record_select"
+      'record_select'
     end
   end
 

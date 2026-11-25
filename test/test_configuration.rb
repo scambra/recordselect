@@ -64,7 +64,7 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
   end
 
   def test_text_search_preserves_explicit_fields
-    assert_equal ['(name LIKE ? OR email LIKE ?)', 'alice%', 'alice%'], controller(search_on: [:name, :email]).text_conditions
+    assert_equal ['(name LIKE ? OR email LIKE ?)', 'alice%', 'alice%'], controller(search_on: %i[name email]).text_conditions
   end
 
   def test_default_filters_preserve_model_columns_and_ignore_reserved_and_unknown_parameters
@@ -90,7 +90,7 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
 
   def test_overriding_one_list_preserves_the_other_global_default
     RecordSelect.excluded_columns = [:id]
-    assert_equal [{'company_id' => '2'}], controller(allowed_columns: [:id, :company_id]).filters
+    assert_equal [{'company_id' => '2'}], controller(allowed_columns: %i[id company_id]).filters
   end
 
   def test_explicit_nil_and_empty_exclusions_clear_global_restrictions
@@ -130,13 +130,13 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
   end
 
   def test_global_settings_are_captured_when_the_controller_is_configured
-    RecordSelect.allowed_columns = [:id, :company_id]
+    RecordSelect.allowed_columns = %i[id company_id]
     RecordSelect.excluded_columns = :id
     instance = controller
     RecordSelect.allowed_columns = []
     RecordSelect.excluded_columns = [:company_id]
 
-    assert_equal ['id', 'company_id'], instance.record_select_config.allowed_columns
+    assert_equal %w[id company_id], instance.record_select_config.allowed_columns
     assert_equal ['id'], instance.record_select_config.excluded_columns
     assert_equal [{'company_id' => '2'}], instance.filters
   end

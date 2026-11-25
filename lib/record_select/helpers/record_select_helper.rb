@@ -3,8 +3,7 @@
 module RecordSelectHelper
   # If you use :params option, define this helper in your controller helpers
   # to return array with those params, so _list partial permits them
-  def permit_rs_browse_params
-  end
+  def permit_rs_browse_params; end
 
   def record_select_js(type:, id:, url:, options:)
     javascript_tag("new RecordSelect.#{type}(#{id.to_json}, #{url.to_json}, #{options.to_json});", nonce: true)
@@ -21,7 +20,7 @@ module RecordSelectHelper
   # +rs+::        Options for RecordSelect constructor
   def link_to_record_select(name, controller, options = {})
     options[:params] ||= {}
-    options[:params].merge!(:controller => controller, :action => :browse)
+    options[:params].merge!(controller: controller, action: :browse)
     options[:html] ||= {}
     options[:html][:id] ||= "rs_#{rand(9999)}"
     js = options.include?(:js) ? options[:js] : request.xhr?
@@ -64,7 +63,7 @@ module RecordSelectHelper
     record_select_options = {id: record_select_id(controller.controller_path)}
     record_select_options[:field_name] = options.delete(:field_name) if options[:field_name]
     clear_button_class = 'clear-input-button'
-    if current and not current.new_record?
+    if current && !current.new_record?
       record_select_options[:id] = current.id
       record_select_options[:label] = label_for_field(current, controller)
       clear_button_class += ' enabled'
@@ -137,7 +136,7 @@ module RecordSelectHelper
     params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path)}
     record_select_options[:current] = current.inject([]) do |memo, record|
-      memo.push({:id => record.id, :label => label_for_field(record, controller)})
+      memo.push({id: record.id, label: label_for_field(record, controller)})
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
@@ -205,7 +204,7 @@ module RecordSelectHelper
     case renderer
     when Symbol, String
       # return full-html from the named partial
-      render :partial => renderer.to_s, :locals => {:record => record}
+      render partial: renderer.to_s, locals: {record: record}
 
     when Proc
       # return an html-cleaned descriptive string
@@ -229,7 +228,7 @@ module RecordSelectHelper
         # just return the string
         render_record_from_config(record, renderer)
       end
-    description.match(/<label[^>]*>(.*)<\/label>/) { |match| match[1] } || description if description
+    description.match(%r{<label[^>]*>(.*)</label>}) { |match| match[1] } || description if description
   end
 
   def assert_controller_responds(controller_name)

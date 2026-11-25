@@ -26,28 +26,27 @@ module RecordSelect
     def record_select_includes; end
 
     def record_select_like_operator
-      @like_operator ||= ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" ? "ILIKE" : "LIKE"
+      @like_operator ||= ::ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' ? 'ILIKE' : 'LIKE'
     end
 
     # define special list of selected fields,
     # mainly to define extra fields that can be used for
     # specialized sorting.
-    def record_select_select
-    end
+    def record_select_select; end
 
     # generate conditions from params[:search]
     # override this if you want to customize the search routine
     def record_select_conditions_from_search
-      if params[:search] && !params[:search].strip.empty?
-        if full_text_search?
-          tokens = params[:search].strip.split(' ')
-          search_pattern = '%?%'
-        else
-          tokens = [params[:search].strip]
-          search_pattern = '?%'
-        end
-        build_record_select_conditions(tokens, record_select_like_operator, search_pattern)
+      return unless params[:search] && !params[:search].strip.empty?
+
+      if full_text_search?
+        tokens = params[:search].strip.split
+        search_pattern = '%?%'
+      else
+        tokens = [params[:search].strip]
+        search_pattern = '?%'
       end
+      build_record_select_conditions(tokens, record_select_like_operator, search_pattern)
     end
 
     def full_text_search?
@@ -101,10 +100,10 @@ module RecordSelect
       model = record_select_config.model
       if value.is_a? Array
         {column.name => value}
-      elsif value.blank? and column.null
+      elsif value.blank? && column.null
         {column.name => nil}
-      elsif [:string, :text].include? column.type
-        column_name = model.quoted_table_name + '.' + model.connection.quote_column_name(column.name)
+      elsif %i[string text].include? column.type
+        column_name = "#{model.quoted_table_name}.#{model.connection.quote_column_name(column.name)}"
         ["LOWER(#{column_name}) LIKE ?", value]
       else
         {column.name => record_select_type_cast(column, value)}

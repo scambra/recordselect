@@ -5,7 +5,7 @@ module ActionDispatch
     class Mapper
       module Base
         def record_select_routes
-          get :browse, :on => :collection
+          get :browse, on: :collection
         end
       end
     end

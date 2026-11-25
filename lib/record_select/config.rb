@@ -45,9 +45,7 @@ module RecordSelect
 
     # The method name or proc to notify of a selection event.
     # May not matter if the selection event is intercepted client-side.
-    def notify
-      @notify
-    end
+    attr_reader :notify
 
     # A collection of fields to search. This is essentially raw SQL, so you could search on "CONCAT(first_name, ' ',
     # last_name)" if you wanted to.
@@ -96,8 +94,6 @@ module RecordSelect
     protected
 
     # A singularized underscored version of the model we're browsing
-    def klass
-      @klass
-    end
+    attr_reader :klass
   end
 end
