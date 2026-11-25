@@ -13,10 +13,7 @@ module RecordSelect
       @notify = block_given? ? proc : options[:notify]
       @per_page = options[:per_page]
       @search_on = [options[:search_on]].flatten
-      allowed_columns = options.fetch(:allowed_columns) { RecordSelect.allowed_columns }
-      excluded_columns = options.fetch(:excluded_columns) { RecordSelect.excluded_columns }
-      @allowed_columns = Array(allowed_columns).map(&:to_s) unless allowed_columns.nil?
-      @excluded_columns = Array(excluded_columns).map(&:to_s)
+      configure_column_filters(options)
       @order_by = options[:order_by]
       @full_text_search = options[:full_text_search]
       @label = options[:label]
@@ -95,5 +92,14 @@ module RecordSelect
 
     # A singularized underscored version of the model we're browsing
     attr_reader :klass
+
+    private
+
+    def configure_column_filters(options)
+      allowed_columns = options.fetch(:allowed_columns) { RecordSelect.allowed_columns }
+      excluded_columns = options.fetch(:excluded_columns) { RecordSelect.excluded_columns }
+      @allowed_columns = Array(allowed_columns).map(&:to_s) unless allowed_columns.nil?
+      @excluded_columns = Array(excluded_columns).map(&:to_s)
+    end
   end
 end

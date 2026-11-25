@@ -81,6 +81,63 @@ class RecordSelectHelperTest < ActiveSupport::TestCase
     assert_not_nil html.at_css('ul.record-select-list')
   end
 
+  def test_link_preserves_existing_data_and_callback_options
+    options = {js: false, html: {id: 'choose-user', data: {tracking: 'picker'}}, onselect: 'selectUser'}
+    html = fragment(@view.link_to_record_select('Choose', 'users', options))
+    link = html.at_css('a')
+    widget = JSON.parse(link['data-rs-options'])
+
+    assert_equal 'Choose', link.text
+    assert_equal 'choose-user', link['id']
+    assert_equal 'picker', link['data-tracking']
+    assert_equal 'Dialog', link['data-rs-type']
+    assert_equal 'selectUser', widget['onselect']
+    assert_nil html.at_css('script')
+  end
+
+  def test_single_field_keeps_widget_overrides_and_url_parameters
+    url_params = []
+    @view.define_singleton_method(:url_for) do |params|
+      url_params << params
+      '/filtered/users'
+    end
+    options = {controller: 'users', js: false, params: {company_id: 5}, field_name: 'display_name',
+               rs: {id: 9, label: 'Override'}}
+    html = fragment(@view.record_select_field('user_id', @record, options))
+    input = html.at_css('input')
+    widget = JSON.parse(input['data-rs-options'])
+
+    assert_equal [{action: :browse, controller: 'users', company_id: 5}], url_params
+    assert_equal '/filtered/users', input['data-rs-url']
+    assert_equal 'display_name', widget['field_name']
+    assert_equal 9, widget['id']
+    assert_equal 'Override', widget['label']
+    assert_nil input['params']
+    assert_nil input['field_name']
+    assert_nil input['rs']
+  end
+
+  def test_multi_select_renders_javascript_for_ajax_requests
+    request = Struct.new(:xhr?).new(true)
+    @view.define_singleton_method(:request) { request }
+    html = fragment(@view.record_multi_select_field('user_ids', [@record], controller: 'users'))
+
+    assert_nil html.at_css('input[type=text]')['data-rs-options']
+    assert_includes html.at_css('script').text, 'new RecordSelect.Multiple('
+    assert_equal 'user_ids[]', html.at_css('input[type=hidden]')['name']
+  end
+
+  def test_explicit_javascript_option_overrides_ajax_detection
+    request = Struct.new(:xhr?).new(true)
+    @view.define_singleton_method(:request) { request }
+    html = fragment(@view.record_select_autocomplete('user_id', nil, controller: 'users', js: false))
+    widget = JSON.parse(html.at_css('input')['data-rs-options'])
+
+    assert_nil html.at_css('script')
+    assert_equal 'record-select-users', widget['id']
+    assert_nil widget['label']
+  end
+
   private
 
   def fragment(html)

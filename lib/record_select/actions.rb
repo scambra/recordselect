@@ -15,19 +15,7 @@ module RecordSelect
       end
       @page = pager.page(params[:page] || 1)
 
-      respond_to do |wants|
-        wants.html { render_record_select partial: 'browse' }
-        wants.js do
-          if params[:update]
-            render_record_select template: 'browse'
-          else
-            render_record_select partial: 'browse'
-          end
-        end
-        wants.any(:yaml, :xml, :json) do
-          # Use Rails default template rendering for these formats.
-        end
-      end
+      record_select_browse_response
     end
 
     # :method => :post
@@ -63,6 +51,22 @@ module RecordSelect
     end
 
     private
+
+    def record_select_browse_response
+      respond_to do |wants|
+        wants.html { render_record_select partial: 'browse' }
+        wants.js do
+          if params[:update]
+            render_record_select template: 'browse'
+          else
+            render_record_select partial: 'browse'
+          end
+        end
+        wants.any(:yaml, :xml, :json) do
+          # Use Rails default template rendering for these formats.
+        end
+      end
+    end
 
     def record_select_query
       query = record_select_model

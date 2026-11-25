@@ -19,10 +19,7 @@ module RecordSelectHelper
   # +html+::      Options for A tag
   # +rs+::        Options for RecordSelect constructor
   def link_to_record_select(name, controller, options = {})
-    options[:params] ||= {}
-    options[:params].merge!(controller: controller, action: :browse)
-    options[:html] ||= {}
-    options[:html][:id] ||= "rs_#{rand(9999)}"
+    prepare_record_select_link_options(controller, options)
     js = options.include?(:js) ? options[:js] : request.xhr?
 
     controller = assert_controller_responds(options[:params][:controller])
@@ -59,21 +56,11 @@ module RecordSelectHelper
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
-    params = options.delete(:params)
-    record_select_options = {id: record_select_id(controller.controller_path)}
-    record_select_options[:field_name] = options.delete(:field_name) if options[:field_name]
+    record_select_options = record_select_single_options(current, controller, options)
     clear_button_class = 'clear-input-button'
-    if current && !current.new_record?
-      record_select_options[:id] = current.id
-      record_select_options[:label] = label_for_field(current, controller)
-      clear_button_class += ' enabled'
-    end
-    record_select_options.merge! options.delete(:rs) if options[:rs]
+    clear_button_class += ' enabled' if current && !current.new_record?
 
-    options[:autocomplete] = 'off'
-    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
-    rs_data = {type: 'Single', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
+    rs_data = record_select_field_data('Single', controller, options, record_select_options, javascript: js)
     render_record_select_single_field(name, options, rs_data, clear_button_class: clear_button_class, javascript: js)
   end
 
@@ -97,17 +84,13 @@ module RecordSelectHelper
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
-    params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path), label: options.delete(:label)}
     if current
       record_select_options[:label] ||= label_for_field(current, controller)
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    options[:autocomplete] = 'off'
-    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
-    rs_data = {type: 'Autocomplete', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
+    rs_data = record_select_field_data('Autocomplete', controller, options, record_select_options, javascript: js)
     html = text_field_tag(name, nil, options)
     html << record_select_js(**rs_data) if js
 
@@ -133,23 +116,14 @@ module RecordSelectHelper
     js = options.include?(:js) ? options.delete(:js) : request.xhr?
 
     controller = assert_controller_responds(options.delete(:controller))
-    params = options.delete(:params)
     record_select_options = {id: record_select_id(controller.controller_path)}
-    record_select_options[:current] = current.inject([]) do |memo, record|
-      memo.push({id: record.id, label: label_for_field(record, controller)})
+    record_select_options[:current] = current.map do |record|
+      {id: record.id, label: label_for_field(record, controller)}
     end
     record_select_options.merge! options.delete(:rs) if options[:rs]
 
-    options[:autocomplete] = 'off'
-    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
-    rs_data = {type: 'Multiple', id: options[:id], url: url, options: record_select_options}
-    options[:data] = rs_data.transform_keys { |k| "rs_#{k}" } unless js
-    html = text_field_tag("#{name}[]", nil, options)
-    html << hidden_field_tag("#{name}[]", '', id: nil)
-    html << content_tag(:ul, '', class: 'record-select-list')
-    html << record_select_js(**rs_data) if js
-
-    html
+    rs_data = record_select_field_data('Multiple', controller, options, record_select_options, javascript: js)
+    render_record_select_multiple_field(name, options, rs_data, javascript: js)
   end
 
   # A helper to render RecordSelect partials
@@ -180,11 +154,47 @@ module RecordSelectHelper
 
   private
 
+  def prepare_record_select_link_options(controller, options)
+    options[:params] ||= {}
+    options[:params].merge!(controller: controller, action: :browse)
+    options[:html] ||= {}
+    options[:html][:id] ||= "rs_#{rand(9999)}"
+  end
+
+  def record_select_single_options(current, controller, options)
+    record_select_options = {id: record_select_id(controller.controller_path)}
+    record_select_options[:field_name] = options.delete(:field_name) if options[:field_name]
+    if current && !current.new_record?
+      record_select_options[:id] = current.id
+      record_select_options[:label] = label_for_field(current, controller)
+    end
+    record_select_options.merge! options.delete(:rs) if options[:rs]
+    record_select_options
+  end
+
+  def record_select_field_data(type, controller, options, record_select_options, javascript:)
+    params = options.delete(:params)
+    options[:autocomplete] = 'off'
+    url = url_for({action: :browse, controller: controller.controller_path}.merge(params))
+    data = {type: type, id: options[:id], url: url, options: record_select_options}
+    options[:data] = data.transform_keys { |key| "rs_#{key}" } unless javascript
+    data
+  end
+
   def prepare_record_select_field_options(name, options)
     options[:params] ||= {}
     options[:id] ||= name.gsub(/[\[\]]/, '_')
     options[:class] = options[:class] ? options[:class].dup : +''
     options[:class] << ' recordselect'
+  end
+
+  def render_record_select_multiple_field(name, options, rs_data, javascript:)
+    html = text_field_tag("#{name}[]", nil, options)
+    html << hidden_field_tag("#{name}[]", '', id: nil)
+    html << content_tag(:ul, '', class: 'record-select-list')
+    html << record_select_js(**rs_data) if javascript
+
+    html
   end
 
   def render_record_select_single_field(name, options, rs_data, clear_button_class:, javascript:)
