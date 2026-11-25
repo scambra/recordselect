@@ -26,7 +26,7 @@ module RecordSelect
     def record_select_includes; end
 
     def record_select_like_operator
-      @like_operator ||= ::ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' ? 'ILIKE' : 'LIKE'
+      @record_select_like_operator ||= ::ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' ? 'ILIKE' : 'LIKE'
     end
 
     # define special list of selected fields,

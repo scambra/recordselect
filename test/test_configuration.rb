@@ -44,7 +44,7 @@ class RecordSelectConfigurationTest < ActiveSupport::TestCase
   def controller(options = {})
     instance = FilterController.new
     instance.record_select_config = config(options)
-    columns = %w[id name company_id password_digest action].to_h { |name| [name, Struct.new(:name).new(name)] }
+    columns = %w[id name company_id password_digest action].index_with { |name| Struct.new(:name).new(name) }
     model = Struct.new(:columns_hash).new(columns)
     instance.record_select_config.define_singleton_method(:model) { model }
     instance.params = {'id' => '1', 'company_id' => '2', 'password_digest' => 'secret', 'action' => 'browse', 'unknown' => 'ignored'}

@@ -55,7 +55,7 @@ module RecordSelect
     def column_allowed?(name)
       name = name.to_s
       allowed = allowed_columns
-      (allowed.nil? || allowed.include?(name)) && !excluded_columns.include?(name)
+      (allowed.nil? || allowed.include?(name)) && excluded_columns.exclude?(name)
     end
 
     def order_by

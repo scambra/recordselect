@@ -5,9 +5,9 @@
 # own system.
 class Object
   def rs_(key, options = {})
-    unless key.blank?
+    if key.present?
       defaults = {scope: [:record_select], default: key.is_a?(String) ? key : key.to_s.titleize}
-      text = I18n.translate(key.to_s, **defaults, **options)
+      text = I18n.t(key.to_s, **defaults, **options)
       # text = nil if text.include?('translation missing:')
     end
     text ||= key
