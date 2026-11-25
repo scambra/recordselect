@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'rubygems'
-require 'test/unit'
-require 'active_support'
+require_relative 'test_helper'
 
 class RecordselectTest < ActiveSupport::TestCase
   JAVASCRIPT_PATH = File.expand_path('../app/assets/javascripts/record_select.js', __dir__)

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - name: Run RuboCop
+        run: bundle exec rubocop
+      - name: Run tests
+        env:
+          COVERAGE: 'true'
+        run: bundle exec rake test
+      - uses: qltysh/qlty-action/coverage@v2
+        with:
+          oidc: true
+          files: coverage/coverage.json

@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-require 'test/unit'
-require 'minitest/autorun'
-require 'active_support'
-require 'active_support/test_case'
+require_relative 'test_helper'
 require 'active_support/core_ext/object/inclusion'
 require 'record_select'
 require 'record_select/config'
