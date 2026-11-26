@@ -13,6 +13,7 @@ module RecordSelect
       @notify = block_given? ? proc : options[:notify]
       @per_page = options[:per_page]
       @search_on = [options[:search_on]].flatten
+      @like_operator = options.fetch(:like_operator) { RecordSelect.like_operator }
       configure_column_filters(options)
       @order_by = options[:order_by]
       @full_text_search = options[:full_text_search]
@@ -48,6 +49,9 @@ module RecordSelect
     # last_name)" if you wanted to.
     # NOTE: this does *NO* default transforms (such as LOWER()), that's left entirely up to you.
     attr_reader :search_on
+
+    # SQL operator or callable receiving a search_on entry and the model; nil uses the adapter default.
+    attr_reader :like_operator
 
     def column_allowed?(name)
       name = name.to_s

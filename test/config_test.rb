@@ -31,13 +31,16 @@ class RecordSelectConfigTest < ActiveSupport::TestCase
   end
 
   def setup
+    @like_operator = RecordSelect.like_operator
     @allowed_columns = RecordSelect.allowed_columns
     @excluded_columns = RecordSelect.excluded_columns
+    RecordSelect.like_operator = nil
     RecordSelect.allowed_columns = nil
     RecordSelect.excluded_columns = []
   end
 
   def teardown
+    RecordSelect.like_operator = @like_operator
     RecordSelect.allowed_columns = @allowed_columns
     RecordSelect.excluded_columns = @excluded_columns
   end
@@ -70,6 +73,27 @@ class RecordSelectConfigTest < ActiveSupport::TestCase
 
   def test_text_search_preserves_explicit_fields
     assert_equal ['(name LIKE ? OR email LIKE ?)', 'alice%', 'alice%'], controller(search_on: %i[name email]).text_conditions
+  end
+
+  def test_like_operator_defaults_to_the_adapter_operator
+    assert_nil config.like_operator
+  end
+
+  def test_global_like_operator_is_captured_at_configuration_time
+    pattern = ->(column, _model) { column == :name ? 'ILIKE' : 'LIKE' }
+    RecordSelect.like_operator = pattern
+    instance = config
+    RecordSelect.like_operator = 'LIKE'
+
+    assert_same pattern, instance.like_operator
+  end
+
+  def test_controller_like_operator_overrides_the_global_setting
+    RecordSelect.like_operator = 'ILIKE'
+    assert_equal 'LIKE', config(like_operator: 'LIKE').like_operator
+    pattern = ->(_column, _model) { 'LIKE' }
+    assert_same pattern, config(like_operator: pattern).like_operator
+    assert_nil config(like_operator: nil).like_operator
   end
 
   def test_default_filters_preserve_model_columns_and_ignore_reserved_and_unknown_parameters

@@ -4,7 +4,7 @@ require 'active_support/deprecation'
 
 module RecordSelect
   class << self
-    attr_accessor :allowed_columns, :excluded_columns
+    attr_accessor :allowed_columns, :excluded_columns, :like_operator
   end
   self.allowed_columns = []
   self.excluded_columns = []
@@ -30,6 +30,8 @@ module RecordSelect
     # +notify+::    a method name to invoke when a record has been selected.
     # +order_by+::  a SQL string to order the search results
     # +search_on+:: required searchable field or array of fields; [] disables the built-in text search
+    # +like_operator+:: SQL search operator or callable receiving each search_on entry and the model. Overrides
+    #   RecordSelect.like_operator; nil uses the adapter default (ILIKE for PostgreSQL, LIKE otherwise).
     # +allowed_columns+:: URL parameter filter columns; nil allows all model columns. Overrides
     #   RecordSelect.allowed_columns.
     # +excluded_columns+:: URL parameter filter columns to ignore, even if allowed. Overrides

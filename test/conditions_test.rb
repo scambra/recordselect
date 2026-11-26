@@ -63,6 +63,56 @@ class RecordSelectConditionsTest < ActiveSupport::TestCase
     assert_nil conditions
   end
 
+  def test_configured_operator_is_used_without_an_adapter_connection
+    @controller.params[:search] = "O'Reilly"
+    @controller.record_select_config = RecordSelect::Config.new('user', search_on: %w[name email], like_operator: 'ILIKE')
+
+    assert_equal ['(name ILIKE ? OR email ILIKE ?)', "O'Reilly%", "O'Reilly%"], conditions
+  end
+
+  def test_callable_operator_receives_each_column_and_model_once_for_multiple_tokens
+    columns = [:name, 'users.email']
+    received = []
+    model = Class.new
+    pattern = lambda do |column, configured_model|
+      received << [column, configured_model]
+      column == :name ? 'ILIKE' : 'LIKE'
+    end
+    @controller.params[:search] = 'Alice Smith'
+    @controller.record_select_config = RecordSelect::Config.new('user', search_on: columns, full_text_search: true, like_operator: pattern)
+
+    @controller.record_select_config.define_singleton_method(:model) { model }
+
+    assert_equal ['(name ILIKE ? OR users.email LIKE ?) AND (name ILIKE ? OR users.email LIKE ?)', '%Alice%', '%Alice%', '%Smith%', '%Smith%'], conditions
+    assert_equal columns.map { |column| [column, model] }, received
+  end
+
+  def test_global_callable_can_choose_an_operator_from_model_column_collation
+    previous_operator = RecordSelect.like_operator
+    RecordSelect.like_operator = lambda do |column, model|
+      model.columns_hash.fetch(column.to_s).collation == 'case_insensitive' ? 'LIKE' : 'ILIKE'
+    end
+    column_type = Struct.new(:collation)
+    columns = {'name' => column_type.new('case_sensitive'), 'email' => column_type.new('case_insensitive')}
+    model = Class.new
+    model.define_singleton_method(:columns_hash) { columns }
+    @controller.params[:search] = 'Alice'
+    @controller.record_select_config = RecordSelect::Config.new('user', search_on: %i[name email])
+    @controller.record_select_config.define_singleton_method(:model) { model }
+
+    assert_equal ['(name ILIKE ? OR email LIKE ?)', 'Alice%', 'Alice%'], conditions
+  ensure
+    RecordSelect.like_operator = previous_operator
+  end
+
+  def test_empty_search_fields_do_not_call_the_pattern
+    pattern = ->(_column, _model) { flunk 'empty search fields must not call the pattern' }
+    @controller.params[:search] = 'Alice'
+    @controller.record_select_config = RecordSelect::Config.new('user', search_on: [], like_operator: pattern)
+
+    assert_nil conditions
+  end
+
   def test_adapter_controls_case_insensitive_search
     %w[PostgreSQL SQLite MySQL].each do |adapter|
       controller = Controller.new

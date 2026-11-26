@@ -53,6 +53,32 @@ record_select search_on: [:name, :email]
 
 Use +search_on: []+ for a custom search implementation or when assigning search fields later. With an empty array, the built-in text search adds no conditions.
 
+The text search operator defaults to +ILIKE+ on PostgreSQL and +LIKE+ on other adapters. Set +RecordSelect.like_operator+ in an initializer to override it globally:
+
+```rb
+RecordSelect.like_operator = 'LIKE'
+```
+
+Override the global setting per controller with +like_operator+. Either setting accepts a string or a callable that receives each configured +search_on+ entry unchanged and the configured model, and returns its SQL operator:
+
+```rb
+record_select search_on: [:name, :email],
+              like_operator: ->(column, _model) { column == :email ? 'LIKE' : 'ILIKE' }
+```
+
+A global callable can inspect model column metadata, including collation:
+
+```rb
+RecordSelect.like_operator = lambda do |column, model|
+  collation = model.columns_hash[column.to_s]&.collation
+  collation == 'case_insensitive' ? 'LIKE' : 'ILIKE'
+end
+```
+
+Use the collation names and operators supported by your database. The +columns_hash+ lookup above expects simple column names; qualified names and SQL expressions need separate handling.
+
+The global setting is captured when the controller is configured. An explicit +like_operator: nil+ restores the adapter default for that controller. This setting controls the SQL operator; prefix and full-text wildcard behavior stays the same.
+
 URL parameters matching model columns can also filter the records. Limit these separately from text search using global defaults, for example in an initializer:
 
 ```rb

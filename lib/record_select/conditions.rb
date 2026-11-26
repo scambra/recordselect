@@ -46,24 +46,32 @@ module RecordSelect
         tokens = [params[:search].strip]
         search_pattern = '?%'
       end
-      build_record_select_conditions(tokens, record_select_like_operator, search_pattern)
+      like_operator = record_select_config.like_operator || record_select_like_operator
+      build_record_select_conditions(tokens, like_operator, search_pattern)
     end
 
     def full_text_search?
       (record_select_config.full_text_search? && params[:rs_mode].blank?) || params[:rs_mode] == 'contains'
     end
 
-    def build_record_select_conditions(tokens, operator, search_pattern)
-      return if record_select_config.search_on.empty?
+    def build_record_select_conditions(tokens, like_operator, search_pattern)
+      columns = record_select_config.search_on
+      return if columns.empty?
 
-      where_clauses = record_select_config.search_on.collect { |sql| "#{sql} #{operator} ?" }
+      where_clauses = columns.collect do |column|
+        operator =
+          if like_operator.respond_to?(:call)
+            like_operator.call(column, record_select_config.model)
+          else
+            like_operator
+          end
+        "#{column} #{operator} ?"
+      end
       phrase = "(#{where_clauses.join(' OR ')})"
       sql = ([phrase] * tokens.length).join(' AND ')
 
-      tokens = tokens.collect do |token|
-        [search_pattern.sub('?', token)] * record_select_config.search_on.length
-      end.flatten
-      [sql, *tokens]
+      values = tokens.collect { |token| [search_pattern.sub('?', token)] * columns.length }.flatten
+      [sql, *values]
     end
 
     # generate conditions from the url parameters (e.g. users/browse?group_id=5)
